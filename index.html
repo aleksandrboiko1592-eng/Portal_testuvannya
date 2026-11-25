@@ -825,6 +825,29 @@
       }
     }
 
+    function syncSummaryToGoogleSheet() {
+      const url = getApiUrl();
+      if (!url || !state.session || state.responses.length === 0) return;
+      const analysis = analyzeData();
+      const problemsText = analysis.risks
+        .map((r, i) => `${i + 1}. ${r.title} | Проблема: ${r.text} | Рішення: ${r.solution}`)
+        .join('\n');
+      const recommendationsText = analysis.recommendations.join('\n');
+
+      return apiPost({
+        action: 'syncReport',
+        sessionId: state.session.id,
+        militaryUnit: state.session.militaryUnit || state.config.militaryUnit || '',
+        unit: state.session.unit || '',
+        topicTitle: state.session.topicTitle || '',
+        submittedCount: analysis.submittedCount,
+        avgScore: analysis.avgScore,
+        highRiskCount: analysis.riskCounts.high,
+        problemsText,
+        recommendationsText
+      });
+    }
+
     async function syncPortalFromServer(silent = false) {
       if (state.isRespondentLink || !state.session) return;
       if (!getApiUrl()) {
@@ -837,6 +860,7 @@
         saveState();
         document.getElementById('badge-count').textContent = state.responses.length;
         renderPortalView();
+        syncSummaryToGoogleSheet();
         if (!silent) showToast(`Оновлено з сервера: ${state.responses.length} проходжень`);
       } else if (!silent) {
         showToast('Не вдалося отримати дані з сервера');
@@ -1175,7 +1199,13 @@
       saveState();
       document.getElementById('badge-count').textContent = state.responses.length;
       if (getApiUrl()) {
-        apiPost({ action: 'submitResponse', sessionId: s.id, response: record });
+        apiPost({
+          action: 'submitResponse',
+          sessionId: s.id,
+          militaryUnit: s.militaryUnit || state.config.militaryUnit || '',
+          unit: s.unit || '',
+          response: record
+        }).then(() => syncSummaryToGoogleSheet());
       }
 
       document.getElementById('runner-questions').classList.add('hidden');
@@ -1987,6 +2017,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
       const s = state.session;
       const sampleNames = ['Мельник І.С.', 'Ткаченко Д.А.', 'Бондар В.М.', 'Савченко Р.П.', 'Лисенко О.К.', 'Кравчук А.В.', 'Мороз С.І.'];
       const sampleRanks = ['Солдат', 'Старший солдат', 'Молодший сержант', 'Сержант', 'Лейтенант'];
+      const addedRecords = [];
 
       for (let k = 0; k < 5; k++) {
         const num = state.responses.length + 1;
@@ -2001,7 +2032,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
         const scorePct = Math.round((correctCount / s.questions.length) * 100);
         const isAnon = s.anonymity === 'anonymous';
 
-        state.responses.push({
+        const rec = {
           id: `RESP-${String(num).padStart(3, '0')}`,
           participantLabel: isAnon ? `Учасник #${String(num).padStart(2, '0')} (Анонімно)` : `${sampleNames[(num - 1) % sampleNames.length]}`,
           rank: isAnon ? 'Приховано' : sampleRanks[(num - 1) % sampleRanks.length],
@@ -2012,12 +2043,24 @@ xmlns="http://www.w3.org/TR/REC-html40">
           riskLevel: computeRiskLevel(scorePct).key,
           submittedAt: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           durationSec: 45 + Math.floor(Math.random() * 90)
-        });
+        };
+        state.responses.push(rec);
+        addedRecords.push(rec);
       }
       saveState();
       document.getElementById('badge-count').textContent = state.responses.length;
       renderPortalView();
-      showToast('Додано 5 проходжень та оновлено звіти Word і Excel');
+
+      if (getApiUrl()) {
+        Promise.all(addedRecords.map(rec => apiPost({
+          action: 'submitResponse',
+          sessionId: s.id,
+          militaryUnit: s.militaryUnit || state.config.militaryUnit || '',
+          unit: s.unit || '',
+          response: rec
+        }))).then(() => syncSummaryToGoogleSheet());
+      }
+      showToast('Додано 5 проходжень та оновлено звіти Word, Excel і таблицю');
     });
 
     document.getElementById('btn-clear-results').addEventListener('click', () => {
