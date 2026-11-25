@@ -1,177 +1,2253 @@
-const SHEET_SESSIONS = 'Sessions';
-const SHEET_RESPONSES = 'Responses';
-const SHEET_REPORTS = 'Reports_Summary';
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Портал тестування та звітності підрозділу</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .tab-active { background-color: #1e3a2f; color: #ffffff; }
+    .tab-inactive { color: #334155; }
+    .tab-inactive:hover { background-color: #e2e8f0; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade { animation: fadeIn 0.2s ease-out; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col">
 
-function getOrCreateSheet(ss, name, headers) {
-  let sheet = ss.getSheetByName(name);
-  if (!sheet) {
-    sheet = ss.insertSheet(name);
-  }
-  if (headers && headers.length > 0) {
-    const firstRow = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
-    const isEmpty = firstRow.every(v => v === '' || v === null);
-    if (isEmpty) {
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-      sheet.setFrozenRows(1);
+  <!-- Top Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-[#1e3a2f] text-emerald-100 flex items-center justify-center shrink-0">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Веб-портал тестування підрозділу</h1>
+            <p class="text-xs text-slate-500">Створення сесій, проходження, аналітика ризиків та експорт звітів у Word та Excel</p>
+          </div>
+        </div>
+
+        <nav id="main-nav" class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl overflow-x-auto" aria-label="Навігація">
+          <button type="button" id="nav-setup" class="tab-active px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap flex items-center gap-1.5 transition">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+            <span>1. Налаштування</span>
+          </button>
+          <button type="button" id="nav-take" class="tab-inactive px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap flex items-center gap-1.5 transition">
+            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+            <span>2. Пройти тест</span>
+          </button>
+          <button type="button" id="nav-portal" class="tab-inactive px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap flex items-center gap-1.5 transition">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span>3. Портал і звіти</span>
+            <span id="badge-count" class="ml-1 px-1.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-600 text-white">0</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- VIEW 1: SETUP & LINK GENERATION -->
+    <section id="view-setup" class="space-y-6 animate-fade">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left: Configurator Form -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Конфігурація тестування</h2>
+              <p class="text-sm text-slate-500">Оберіть параметри сесії для формування посилання підрозділу</p>
+            </div>
+            <button type="button" id="btn-open-add-q" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 transition">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Додати питання</span>
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <label for="input-military-unit" class="block text-sm font-semibold text-slate-700">Військова частина</label>
+            <input id="input-military-unit" type="text" value="ВЧ А5313" placeholder="Напр.: ВЧ А5313, ВЧ А5143, ВЧ А1376" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+          </div>
+
+          <div class="space-y-2">
+            <label for="select-unit" class="block text-sm font-semibold text-slate-700">Підрозділ</label>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <select id="select-unit" class="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <optgroup label="Підрозділи ВЧ А5313 (81 ЦПП)">
+                  <option value="Відділення супроводження груп ПМП">Відділення супроводження груп ПМП</option>
+                  <option value="Відділення моральної підтримки">Відділення моральної підтримки</option>
+                  <option value="Відділення оперативної психологічної підтримки">Відділення оперативної психологічної підтримки</option>
+                  <option value="Відділення психологічного супроводу">Відділення психологічного супроводу</option>
+                  <option value="Група транспортного забезпечення">Група транспортного забезпечення</option>
+                  <option value="Управління та штаб (ВЧ А5313)">Управління та штаб (ВЧ А5313)</option>
+                </optgroup>
+                <optgroup label="Частини та підрозділи виїзної роботи / супроводу">
+                  <option value="58 ОМПБр (ВЧ А1376)">58 ОМПБр (ВЧ А1376)</option>
+                  <option value="42 ОМБр">42 ОМБр</option>
+                  <option value="119 ОБр ТрО">119 ОБр ТрО</option>
+                  <option value="ВЧ А5161">ВЧ А5161</option>
+                  <option value="ВЧ А5143 (14 АК)">ВЧ А5143 (14 АК)</option>
+                </optgroup>
+                <optgroup label="Батальйонна / ротна ланка">
+                  <option value="1-й механізований батальйон">1-й механізований батальйон</option>
+                  <option value="2-й механізований батальйон">2-й механізований батальйон</option>
+                  <option value="Рота вогневої підтримки">Рота вогневої підтримки</option>
+                  <option value="Підрозділ БпЛА">Підрозділ БпЛА</option>
+                  <option value="Медичний пункт батальйону">Медичний пункт батальйону</option>
+                </optgroup>
+              </select>
+              <div class="flex gap-2">
+                <input id="input-custom-unit" type="text" placeholder="Свій підрозділ..." class="w-full sm:w-44 rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                <button type="button" id="btn-add-unit" class="px-3 py-2 rounded-xl bg-slate-800 text-white text-xs font-medium hover:bg-slate-700 whitespace-nowrap transition">Додати</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="topic-selection-block" class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label class="block text-sm font-semibold text-slate-700">Тема тестування / опитування</label>
+              <span id="selected-topic-badge" class="text-xs font-medium text-emerald-700">Обрано тему</span>
+            </div>
+            <div id="topic-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+          </div>
+
+          <div id="qcount-selection-block" class="pt-2 border-t border-slate-100">
+            <div class="space-y-2.5 bg-slate-50/80 border border-slate-200/80 rounded-xl p-4">
+              <div class="flex items-center justify-between gap-2">
+                <label for="range-qcount" class="text-sm font-semibold text-slate-800">Вибір кількості питань</label>
+                <span id="label-qcount" class="text-sm font-bold text-emerald-800 bg-emerald-100 px-3 py-0.5 rounded-lg">5 питань</span>
+              </div>
+              <input id="range-qcount" type="range" min="1" max="50" value="5" class="w-full accent-emerald-700 cursor-pointer" />
+              <div class="flex items-center justify-between text-xs text-slate-500">
+                <span>Мін: 1 питання</span>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" data-preset="5" class="q-preset px-2 py-0.5 rounded border border-slate-300 bg-white hover:bg-slate-100 text-[11px] font-medium">5</button>
+                  <button type="button" data-preset="10" class="q-preset px-2 py-0.5 rounded border border-slate-300 bg-white hover:bg-slate-100 text-[11px] font-medium">10</button>
+                  <button type="button" data-preset="20" class="q-preset px-2 py-0.5 rounded border border-slate-300 bg-white hover:bg-slate-100 text-[11px] font-medium">20</button>
+                  <button type="button" data-preset="50" class="q-preset px-2 py-0.5 rounded border border-slate-300 bg-white hover:bg-slate-100 text-[11px] font-medium">50</button>
+                </div>
+                <span id="label-qmax">Макс: 50 питань</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <span class="block text-sm font-semibold text-slate-700">Режим анонімності</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="cursor-pointer border rounded-xl p-3.5 flex items-start gap-3 transition" id="anon-card-true">
+                <input type="radio" name="anonymity" value="anonymous" class="mt-1 accent-emerald-700" checked />
+                <div>
+                  <div class="text-sm font-semibold text-slate-900">Анонімно</div>
+                  <div class="text-xs text-slate-500">Без ПІБ та звання. Кожному учаснику присвоюється захищений ID (напр. Учасник #04).</div>
+                </div>
+              </label>
+              <label class="cursor-pointer border rounded-xl p-3.5 flex items-start gap-3 transition" id="anon-card-false">
+                <input type="radio" name="anonymity" value="named" class="mt-1 accent-emerald-700" />
+                <div>
+                  <div class="text-sm font-semibold text-slate-900">Персоніфіковано</div>
+                  <div class="text-xs text-slate-500">Учасник вказує ПІБ / позивний та військове звання перед початком тесту.</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="button" id="btn-generate-session" class="w-full py-3 px-4 rounded-xl bg-[#1e3a2f] hover:bg-[#162b23] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition">
+              <i data-lucide="link" class="w-4 h-4"></i>
+              <span>Сформувати посилання та активувати сесію</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Generated Link & Dispatch Card -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-slate-900">Посилання для підрозділу</h3>
+              <span id="session-status-pill" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Очікує формування</span>
+            </div>
+
+            <div id="session-summary-box" class="bg-slate-50 rounded-xl p-3.5 text-xs space-y-1.5 border border-slate-200">
+              <div class="flex justify-between"><span class="text-slate-500">ID сесії:</span><span id="sum-id" class="font-mono font-semibold text-slate-800">—</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Військова частина:</span><span id="sum-mil-unit" class="font-semibold text-slate-800">—</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Підрозділ:</span><span id="sum-unit" class="font-semibold text-slate-800">—</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Тема:</span><span id="sum-topic" class="font-semibold text-slate-800">—</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Питань / Режим:</span><span id="sum-meta" class="font-semibold text-slate-800">—</span></div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="input-share-link" class="block text-xs font-semibold text-slate-600">Унікальне посилання сесії</label>
+              <div class="flex gap-2">
+                <input id="input-share-link" type="text" readonly value="Натисніть «Сформувати посилання»..." class="flex-1 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-mono text-slate-700" />
+                <button type="button" id="btn-copy-link" disabled class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 text-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  <span>Копіювати</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              <button type="button" id="btn-dispatch-unit" disabled class="py-2.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-40 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Відправити в підрозділ</span>
+              </button>
+              <button type="button" id="btn-open-test-now" disabled class="py-2.5 px-3 rounded-xl border border-emerald-700 text-emerald-800 hover:bg-emerald-50 disabled:opacity-40 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                <span>Відкрити тест зараз</span>
+              </button>
+            </div>
+
+            <div id="dispatch-log" class="hidden rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-900 space-y-1">
+              <div class="font-semibold flex items-center gap-1.5">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+                <span>Повідомлення сформовано та надіслано</span>
+              </div>
+              <p id="dispatch-text" class="text-emerald-800 leading-relaxed"></p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="cloud" class="w-4 h-4 text-emerald-700"></i>
+                <span>Синхронізація (Google Таблиця / Сервер)</span>
+              </h3>
+              <span id="api-status-badge" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">Локально</span>
+            </div>
+            <p class="text-xs text-slate-500">Вставте URL веб-додатку Google Apps Script (<code>.../exec</code>), щоб результати зберігались у таблицю та завантажувались у портал.</p>
+            <div class="flex gap-2">
+              <input id="input-api-url" type="text" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              <button type="button" id="btn-test-sync" class="px-2.5 py-2 rounded-xl border border-emerald-300 bg-emerald-50 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 whitespace-nowrap">Перевірити</button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-emerald-700"></i>
+              <span>Як працює автозбір результатів</span>
+            </h3>
+            <ul class="text-xs text-slate-600 space-y-2 leading-relaxed">
+              <li class="flex gap-2"><span class="font-bold text-emerald-700">1.</span><span>Після формування посилання кожен військовослужбовець проходить тест за посиланням або у вкладці <b>«2. Пройти тест»</b>.</span></li>
+              <li class="flex gap-2"><span class="font-bold text-emerald-700">2.</span><span>Після натискання «Завершити» дані передаються до Google Таблиці та підтягуються у вкладку <b>«3. Портал і звіти»</b>.</span></li>
+              <li class="flex gap-2"><span class="font-bold text-emerald-700">3.</span><span>У вкладці звітів доступний миттєвий експорт у <b>Excel (.xls)</b> та <b>Word (.doc)</b> із повним описом проблемних питань і пропозицій їх вирішення.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: RESPONDENT TEST RUNNER -->
+    <section id="view-take" class="hidden max-w-3xl mx-auto space-y-6 animate-fade">
+      <div id="test-empty-state" class="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-4">
+        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto">
+          <i data-lucide="link-2-off" class="w-6 h-6"></i>
+        </div>
+        <h2 class="text-lg font-bold text-slate-900">Немає активної сесії тестування</h2>
+        <p class="text-sm text-slate-500 max-w-md mx-auto">Спочатку оберіть підрозділ, тему та кількість питань у вкладці «Налаштування» і сформуйте посилання.</p>
+        <button type="button" id="btn-go-setup" class="px-4 py-2.5 rounded-xl bg-[#1e3a2f] text-white text-sm font-semibold hover:bg-[#162b23] transition">Перейти до налаштувань</button>
+      </div>
+
+      <div id="test-runner-card" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-[#1e3a2f] text-white p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="text-xs text-emerald-200 font-medium uppercase tracking-wider" id="runner-unit">Підрозділ</div>
+            <h2 class="text-lg sm:text-xl font-bold mt-0.5" id="runner-topic">Тема тесту</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="runner-anon-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-white/15 text-white">Анонімно</span>
+            <span id="runner-progress-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500 text-white">0 / 5</span>
+          </div>
+        </div>
+
+        <div id="runner-intro" class="p-5 sm:p-6 space-y-5">
+          <div id="runner-named-fields" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label for="resp-name" class="block text-sm font-semibold text-slate-700">ПІБ або позивний <span class="text-rose-600">*</span></label>
+              <input id="resp-name" type="text" placeholder="Напр.: Коваленко О.В. / Сокіл" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+            </div>
+            <div class="space-y-1.5">
+              <label for="resp-rank" class="block text-sm font-semibold text-slate-700">Військове звання</label>
+              <select id="resp-rank" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <option value="Солдат">Солдат</option>
+                <option value="Старший солдат">Старший солдат</option>
+                <option value="Молодший сержант">Молодший сержант</option>
+                <option value="Сержант">Сержант</option>
+                <option value="Старший сержант">Старший сержант</option>
+                <option value="Лейтенант">Лейтенант</option>
+                <option value="Старший лейтенант">Старший лейтенант</option>
+                <option value="Капітан">Капітан</option>
+                <option value="Майор">Майор</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="runner-anon-notice" class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-600 flex items-start gap-3">
+            <i data-lucide="lock" class="w-5 h-5 text-emerald-700 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-semibold text-slate-800">Анонімний режим активовано</div>
+              <p class="text-xs mt-0.5">Ваші персональні дані не збираються. Після завершення тесту системі буде передано лише ваш знеособлений ідентифікатор та відповіді.</p>
+            </div>
+          </div>
+
+          <button type="button" id="btn-start-quiz" class="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm transition">Розпочати тестування</button>
+        </div>
+
+        <div id="runner-questions" class="hidden p-5 sm:p-6 space-y-6">
+          <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+            <div id="runner-progress-bar" class="bg-emerald-600 h-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+
+          <div id="question-container" class="space-y-4"></div>
+
+          <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+            <button type="button" id="btn-prev-q" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 disabled:opacity-40 transition">Назад</button>
+            <div class="flex gap-2">
+              <button type="button" id="btn-next-q" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition">Далі</button>
+              <button type="button" id="btn-submit-quiz" class="hidden px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold flex items-center gap-1.5 transition">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Завершити та відправити</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="runner-done" class="hidden p-6 sm:p-8 text-center space-y-4">
+          <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
+            <i data-lucide="check-circle" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900">Тест успішно пройдено!</h3>
+          <p id="runner-done-desc" class="text-sm text-slate-600 max-w-md mx-auto">Ваші відповіді збережено та передано відповідальному за звітність. Звіт доступний лише керівнику / адміністратору порталу.</p>
+          <div class="flex flex-wrap justify-center gap-3 pt-2">
+            <button type="button" id="btn-retake-another" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition">Пройти ще раз (наступний учасник)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: PORTAL ANALYTICS, REPORTS & EXPORT -->
+    <section id="view-portal" class="hidden space-y-6 animate-fade">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="text-lg font-bold text-slate-900">Звітність та моніторинг результатів</h2>
+            <span id="portal-unit-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">Підрозділ не обрано</span>
+          </div>
+          <p id="portal-topic-sub" class="text-xs text-slate-500">Автоматичне формування звітів у Word (.doc) та Excel (.xls) з повним описом проблемних питань і пропозицій</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="btn-sync-portal" class="px-3 py-2 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Оновити з таблиці</span>
+          </button>
+          <button type="button" id="btn-simulate-5" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-700"></i>
+            <span>Симулювати +5</span>
+          </button>
+          <button type="button" id="btn-clear-results" class="px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Очистити</span>
+          </button>
+          <button type="button" id="btn-download-word" class="px-3.5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>Звіт Word (.doc)</span>
+          </button>
+          <button type="button" id="btn-download-excel" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span>Звіт Excel (.xls)</span>
+          </button>
+          <button type="button" id="btn-download-zip" class="px-3.5 py-2 rounded-xl bg-[#1e3a2f] hover:bg-[#162b23] text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="folder-down" class="w-4 h-4"></i>
+            <span>Папка (.ZIP)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-1.5">
+          <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+            <span>Подано тестів</span>
+            <i data-lucide="users-check" class="w-4 h-4 text-emerald-600"></i>
+          </div>
+          <div id="kpi-submitted-count" class="text-2xl font-bold text-slate-900">0</div>
+          <div class="text-xs text-slate-500">Фактично завершених проходжень</div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-1.5">
+          <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+            <span>Середній бал</span>
+            <i data-lucide="award" class="w-4 h-4 text-blue-600"></i>
+          </div>
+          <div id="kpi-avg-score" class="text-2xl font-bold text-slate-900">0%</div>
+          <div class="text-xs text-slate-500">За результатами поданих тестів</div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-1.5">
+          <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+            <span>Високий ризик</span>
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600"></i>
+          </div>
+          <div id="kpi-high-risk" class="text-2xl font-bold text-rose-600">0</div>
+          <div class="text-xs text-slate-500">Учасників потребують уваги</div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-1.5">
+          <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+            <span>Файлів у папці</span>
+            <i data-lucide="folder-open" class="w-4 h-4 text-amber-600"></i>
+          </div>
+          <div id="kpi-files-count" class="text-2xl font-bold text-slate-900">0</div>
+          <div class="text-xs text-slate-500">Word + Excel + протоколи</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
+          <h3 class="text-sm font-bold text-slate-900">Розподіл за рівнями ризику</h3>
+          <div class="relative h-64">
+            <canvas id="chart-risk"></canvas>
+          </div>
+        </div>
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
+          <h3 class="text-sm font-bold text-slate-900">Успішність / оптимальність відповідей по питаннях (%)</h3>
+          <div class="relative h-64">
+            <canvas id="chart-questions"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i>
+            <span>Повний опис виявлених проблемних питань</span>
+          </h3>
+          <div id="risks-list" class="space-y-2.5 text-sm">
+            <p class="text-xs text-slate-500">Недостатньо даних. Проведіть тестування або натисніть «Симулювати +5».</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600"></i>
+            <span>Пропозиції та заходи щодо їх вирішення</span>
+          </h3>
+          <div id="recommendations-list" class="space-y-2.5 text-sm">
+            <p class="text-xs text-slate-500">Пропозиції сформуються автоматично після отримання перших відповідей.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <h3 class="text-sm font-bold text-slate-900">Зведена таблиця учасників</h3>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" id="btn-table-word" class="px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50 text-xs font-semibold text-blue-800 hover:bg-blue-100 flex items-center gap-1.5 transition">
+              <i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-700"></i>
+              <span>Зберегти у Word (.doc)</span>
+            </button>
+            <button type="button" id="btn-table-excel" class="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 flex items-center gap-1.5 transition">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-700"></i>
+              <span>Зберегти в Excel (.xls)</span>
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-slate-600 border-b border-slate-200">
+                <th class="py-3 px-4 font-semibold">#</th>
+                <th class="py-3 px-4 font-semibold">Учасник / ID</th>
+                <th class="py-3 px-4 font-semibold">Звання</th>
+                <th class="py-3 px-4 font-semibold">Результат</th>
+                <th class="py-3 px-4 font-semibold">Рівень ризику</th>
+                <th class="py-3 px-4 font-semibold">Час подачі</th>
+                <th class="py-3 px-4 font-semibold">Статус</th>
+              </tr>
+            </thead>
+            <tbody id="participants-tbody" class="divide-y divide-slate-100">
+              <tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">Ще немає поданих тестів</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="folder-tree" class="w-4 h-4 text-amber-600"></i>
+              <span>Сформована папка звіту: <span id="folder-name-label" class="font-mono text-emerald-800">Звіт_Підрозділу/</span></span>
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">Містить звіти у форматах Word (.doc), Excel (.xls) та індивідуальні протоколи учасників</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[300px]">
+          <div id="folder-file-list" class="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50 p-3 space-y-1 max-h-96 overflow-y-auto">
+            <div class="text-xs text-slate-400 p-3">Папка порожня</div>
+          </div>
+          <div class="lg:col-span-8 p-4 bg-slate-900 text-slate-100 font-mono text-xs overflow-auto max-h-96">
+            <div id="file-preview-header" class="text-emerald-400 font-semibold pb-2 mb-2 border-b border-slate-700">Оберіть файл для перегляду</div>
+            <pre id="file-preview-content" class="whitespace-pre-wrap leading-relaxed text-slate-200">Вміст файлу відобразиться тут...</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal: Add Custom Question -->
+  <div id="modal-add-q" class="hidden fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Додати нове питання до теми</h3>
+        <button type="button" id="btn-close-modal-q" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="space-y-3 text-sm">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Тема</label>
+          <select id="new-q-topic" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Текст питання</label>
+          <input id="new-q-text" type="text" placeholder="Введіть формулювання питання..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold text-slate-600">Варіанти відповіді (перший — оптимальний / низький ризик)</label>
+          <input id="new-q-opt0" type="text" placeholder="Варіант 1 (оптимальний / низький ризик)" class="w-full rounded-xl border border-emerald-300 bg-emerald-50/40 px-3 py-2 text-sm" />
+          <input id="new-q-opt1" type="text" placeholder="Варіант 2" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+          <input id="new-q-opt2" type="text" placeholder="Варіант 3" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" id="btn-cancel-q" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Скасувати</button>
+        <button type="button" id="btn-save-q" class="px-4 py-2 rounded-xl bg-[#1e3a2f] text-white text-xs font-semibold hover:bg-[#162b23]">Зберегти питання</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2.5 max-w-sm">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+    <span id="toast-msg">Повідомлення</span>
+  </div>
+
+  <script>
+    const MAX_QUESTIONS_LIMIT = 50;
+
+    function refreshIcons() {
+      try {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      } catch (e) {}
     }
-  }
-  return sheet;
-}
 
-function doGet(e) {
-  try {
-    const params = (e && e.parameter) || {};
-    const action = params.action || '';
-    const sessionId = String(params.id || '').trim().toLowerCase();
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-
-    if (action === 'getLatestSession') {
-      const sheet = ss.getSheetByName(SHEET_SESSIONS);
-      if (!sheet || sheet.getLastRow() < 2) {
-        return jsonOut({ ok: false, session: null });
+    const QUESTION_BANK = {
+      functional_duties_a5313: {
+        id: 'functional_duties_a5313',
+        title: 'Функціональні обов’язки (ВЧ А5313)',
+        desc: 'Завдання, підпорядкованість і повноваження відділень ПМП, моральної, оперативної підтримки та транспорту',
+        icon: 'briefcase',
+        questions: [
+          { q: 'Хто виконує обов’язки начальника центру (ВЧ А5313) у разі його відсутності згідно з ФО?', opts: ['Начальник відділення супроводження груп психологічної та моральної підтримки', 'Начальник групи транспортного забезпечення', 'Черговий частини за графіком'], best: 0 },
+          { q: 'За що відповідає начальник відділення моральної підтримки в мирний і воєнний час?', opts: ['За формування цінностей ЗСУ, згуртованості колективів, стійкої мотивації та моральної готовності', 'Виключно за ремонт і технічне обслуговування автомобілів Центру', 'Лише за облік пально-мастильних матеріалів'], best: 0 },
+          { q: 'Яке основне завдання начальника відділення оперативної психологічної підтримки під час бойових дій?', opts: ['Відслідковування динаміки МПС, прогнозування психогенних втрат та надання екстреної психологічної допомоги', 'Проведення стройових оглядів та перевірка караульної служби', 'Ведення фінансово-господарського обліку частини'], best: 0 },
+          { q: 'За що відповідає начальник відділення психологічного супроводу?', opts: ['За оцінювання психологічної готовності та оперативне реагування на кризові психологічні стани в підрозділах', 'За організацію вартової служби гарнізону', 'За продовольче забезпечення особового складу'], best: 0 },
+          { q: 'Які основні завдання покладено на групу транспортного забезпечення Центру?', opts: ['Перевезення особового складу під час виконання завдань, підтримання авто у справному стані та дотримання ПДР', 'Проведення індивідуального психологічного консультування', 'Складання актів службових розслідувань'], best: 0 },
+          { q: 'Які загальні вимоги обов’язкові для начальників усіх відділень ВЧ А5313?', opts: ['Знання Статутів ЗСУ, керівних документів, вимог охорони державної таємниці та правил діловодства', 'Знання лише внутрішнього розпорядку свого кабінету', 'Виконання обов’язків без ведення облікової документації'], best: 0 }
+        ]
+      },
+      mps_guidance_orders: {
+        id: 'mps_guidance_orders',
+        title: 'Оцінювання МПС та керівні накази',
+        desc: 'Критерії оцінки МПС, пункти психологічної допомоги, реабілітація та накази ГК ЗСУ (№349, №431, №99, №153)',
+        icon: 'file-check',
+        questions: [
+          { q: 'Які чотири базові компоненти визначають оцінку морально-психологічного стану (МПС)?', opts: ['Моральна налаштованість, емоційно-вольова налаштованість, функціональна готовність, фахова здатність', 'Фізична сила, стройова виправка, знання статуту, вогнева підготовка', 'Вік, військове звання, вислуга років, сімейний стан'], best: 0 },
+          { q: 'Яким наказом Головнокомандувача ЗСУ затверджено Порядок психологічної підтримки військовослужбовців?', opts: ['Наказом ГК ЗСУ від 01.08.2024 № 349', 'Наказом МОУ від 07.06.2018 № 260', 'Інструкцією з діловодства від 31.01.2024 № 40'], best: 0 },
+          { q: 'Яким керівним документом регламентується проведення психологічної підготовки у ЗСУ?', opts: ['Наказом ГК ЗСУ від 18.09.2024 № 431', 'Наказом про облік речового майна', 'Тимчасовим положенням про автотранспорт'], best: 0 },
+          { q: 'Згідно з яким наказом ГК ЗСУ розгортаються та облаштовуються пункти психологічної допомоги?', opts: ['Наказом ГК ЗСУ від 28.07.2020 № 99', 'Наказом про відрядження особового складу', 'Постановою про виплату оздоровчих'], best: 0 },
+          { q: 'Який відсоток новоприбулого особового складу охоплюється вивченням морально-ділових якостей та визначенням рівня МПС?', opts: ['100% новоприбулого особового складу', 'Не більше 25% вибірково', 'Тільки офіцерський склад'], best: 0 },
+          { q: 'Який опитувальник застосовується для поглибленого вивчення особового складу щодо ризиків дезадаптації та СЗЧ?', opts: ['Багаторівневий особистісний опитувальник «Адаптивність-200»', 'Анкета задоволеності речовим забезпеченням', 'Тест знання правил дорожнього руху'], best: 0 }
+        ]
+      },
+      szch_adaptation_2026: {
+        id: 'szch_adaptation_2026',
+        title: 'Адаптація перед БЗВП та профілактика СЗЧ',
+        desc: 'Комплексна програма адаптації 2026, зниження тривожності та запобігання правопорушенням (ст. 402, 407, 408 ККУ)',
+        icon: 'compass',
+        questions: [
+          { q: 'Яка головна мета Комплексної програми адаптації новоприбулих військовослужбовців перед початком БЗВП (2026)?', opts: ['Первинна соціально-психологічна адаптація до умов служби, зниження тривожності та запобігання «важкому входу»', 'Скорочення терміну БЗВП до 3 днів', 'Заміна практичних стрільб теоретичними лекціями'], best: 0 },
+          { q: 'Що найчастіше спричиняє «важкий вхід» новоприбулих у процес БЗВП та підвищує ризик СЗЧ?', opts: ['Негативний попередній досвід на етапі призову, невирішені цивільні питання та брак зрозумілої інформації', 'Надмірна кількість вихідних днів', 'Наявність індивідуальних консультацій психолога'], best: 0 },
+          { q: 'Які проблемні питання підлягають виявленню та реагуванню на етапі первинної адаптації?', opts: ['Правові, фінансові, соціальні, медичні та духовні питання військовослужбовців', 'Лише наявність власного цивільного автотранспорту', 'Виключно знання іноземних мов'], best: 0 },
+          { q: 'Які статті Кримінального кодексу України передбачають відповідальність за самовільне залишення частини (СЗЧ) та дезертирство?', opts: ['Статті 407 та 408 КК України', 'Статті 130 та 172-20 КУпАП', 'Статті 115 та 185 КК України'], best: 0 },
+          { q: 'Які правопорушення охоплюють статті 402 та 403 КК України при обліку стану військової дисципліни?', opts: ['Непокора та невиконання наказу', 'Порушення правил дорожнього руху', 'Несвоєчасне подання рапорту на відпустку'], best: 0 },
+          { q: 'Як своєчасна ротація особового складу на передових позиціях впливає на МПС підрозділу?', opts: ['Запобігає критичному виснаженню, зберігає боєздатність і довіру до командування', 'Не має жодного впливу на психологічний стан', 'Потрібна лише для проведення інвентаризації'], best: 0 }
+        ]
+      },
+      statutes_docs_zsu: {
+        id: 'statutes_docs_zsu',
+        title: 'Статути ЗСУ, рапорти та діловодство',
+        desc: 'Дисциплінарний статут, службове розслідування (наказ МОУ №608), Інструкція з діловодства №40 та рапорти',
+        icon: 'book-open',
+        questions: [
+          { q: 'Яким наказом затверджено чинну Інструкцію з діловодства у Збройних Силах України?', opts: ['Наказом Головнокомандувача ЗСУ від 31.01.2024 № 40', 'Наказом МОУ від 07.06.2018 № 260', 'Наказом ГК ЗСУ від 28.07.2020 № 99'], best: 0 },
+          { q: 'На підставі яких нормативних актів призначається та проводиться службове розслідування у ЗСУ?', opts: ['Статті 85 Дисциплінарного статуту ЗСУ та Порядку, затвердженого наказом МОУ від 21.11.2017 № 608', 'Лише на підставі усного розпорядження чергового', 'Виключно за Інструкцією з медичного огляду'], best: 0 },
+          { q: 'Який документ складається, якщо особа відмовляється надати письмові пояснення під час службового розслідування?', opts: ['Акт про відмову від надання пояснень за підписом комісії / свідків', 'Рапорт про надання щорічної відпустки', 'Витяг із наказу по стройовій частині'], best: 0 },
+          { q: 'Яким наказом МОУ регулюється виплата грошової допомоги на оздоровлення військовослужбовцям ЗСУ?', opts: ['Наказом МОУ від 07.06.2018 № 260 (розділ XXIII)', 'Наказом ГК ЗСУ від 18.09.2024 № 431', 'Наказом ГК ЗСУ від 01.08.2024 № 349'], best: 0 },
+          { q: 'Що обов’язково зазначає військовослужбовець у рапорті при прийнятті справ та посади?', opts: ['Реквізити наказу по особовому складу, посаду, факт прийняття справ і приступлення до виконання обов’язків', 'Тільки бажану дату наступної відпустки', 'Лише домашню адресу проживання'], best: 0 },
+          { q: 'Що обов’язково вказується у рапорті на щорічну основну відпустку?', opts: ['Строк і дати відпустки, адресу проведення відпустки та прохання про зняття з продовольчого забезпечення', 'Перелік індивідуальних психологічних консультацій', 'Номер закріпленого автомобіля'], best: 0 }
+        ]
+      },
+      unit_survey_v3: {
+        id: 'unit_survey_v3',
+        title: 'Стан підрозділу (v3)',
+        desc: 'Опитування про стан підрозділу: адаптація, забезпечення, служба, атмосфера та довіра',
+        icon: 'clipboard-list',
+        questions: [
+          { q: '[Блок 1. Підстава призову] Як ви потрапили на військову службу?', opts: ['За контрактом або добровільно за мобілізацією', 'За призовом під час мобілізації', 'Інша підстава / потребує уточнення'], best: 0 },
+          { q: '[Блок 2. Адаптація перед БЗВП] Чи отримали ви чіткі роз’яснення спеціалістів перед початком БЗВП?', opts: ['Так, усі роз’яснення надано в повному обсязі', 'Частково, залишались питання', 'Ні, роз’яснень не вистачало'], best: 0 },
+          { q: '[Блок 3. Військовий квиток] Чи коректно оформлено записи у військовому квитку / посвідченні офіцера?', opts: ['Так, записи повні та коректні', 'Є неточності, які потребують звірки', 'Записи відсутні або не оновлені'], best: 0 },
+          { q: '[Блок 4. Речове забезпечення] Як ви оцінюєте речове та матеріальне забезпечення на поточний момент?', opts: ['Забезпечений усім необхідним у достатній мірі', 'Частково забезпечений, є дефіцит окремих позицій', 'Не забезпечений базовими речами / спорядженням'], best: 0 },
+          { q: '[Блок 5. Грошове забезпечення] Чи своєчасно та коректно нараховується грошове забезпечення?', opts: ['Так, вчасно та у повному обсязі', 'Бувають затримки або питання по нарахуваннях', 'Регулярні затримки / незрозумілі нарахування'], best: 0 },
+          { q: '[Блок 6. Харчування, побут і відпочинок] Оцініть умови харчування, побуту та відновлення (0–5)', opts: ['Високий рівень (4–5 балів: задоволений)', 'Середній рівень (2–3 бали: є зауваження)', 'Низький рівень (0–1 бал: незадовільно)'], best: 0 },
+          { q: '[Блок 7. БЗВП та адаптація] Наскільки підготовка БЗВП та адаптація в підрозділі відповідали вимогам служби?', opts: ['Повністю відповідали, адаптація пройшла успішно', 'Частково, знадобилось доучування на місці', 'Не відповідали, адаптація була складною'], best: 0 },
+          { q: '[Блок 8. Бойові завдання] Наскільки чітко поставлені бойові/службові завдання та забезпечено їх виконання?', opts: ['Завдання чіткі, ресурси й порядок дій зрозумілі', 'Частково зрозумілі, є організаційні складнощі', 'Нечіткі завдання або бракує необхідного для виконання'], best: 0 },
+          { q: '[Блок 9. Атмосфера та безпека] Як ви оцінюєте атмосферу в колективі, повагу та психологічну безпеку?', opts: ['Взаємоповага, згуртованість та безпечна атмосфера', 'Загалом спокійно, але трапляються тертя', 'Напружена атмосфера, неповага або конфлікти'], best: 0 },
+          { q: '[Блок 10. Довіра до командирів] Як ви оцінюєте авторитет, лідерство та довіру до безпосередніх командирів?', opts: ['Висока довіра та авторитет командирів', 'Помірна довіра, є зауваження до комунікації', 'Низька довіра / бракує зворотного зв’язку'], best: 0 }
+        ]
+      },
+      psych_readiness_2011: {
+        id: 'psych_readiness_2011',
+        title: 'Психологічна готовність (2011)',
+        desc: 'Самоефективність (Шварцер—Єрусалем), мотивація (Замфір—Реан), КОС та ПФС',
+        icon: 'brain',
+        questions: [
+          { q: '[Шварцер—Єрусалем] Якщо я докладу достатньо зусиль, я завжди зможу вирішити складні завдання.', opts: ['Цілком згоден / скоріше так', 'Частково / залежить від ситуації', 'Скоріше ні / зовсім не згоден'], best: 0 },
+          { q: '[Шварцер—Єрусалем] У непередбачених обставинах я знаю, як правильно діяти.', opts: ['Так, знаходжу рішення навіть у змінах', 'Іноді гублюся, але швидко орієнтуюсь', 'Важко зорієнтуватися без готової інструкції'], best: 0 },
+          { q: '[Замфір—Реан] Що є провідним мотивом вашої професійної/службової діяльності зараз?', opts: ['Внутрішня мотивація: сенс, розвиток та задоволення від справи', 'Зовнішня позитивна: грошове забезпечення, визнання, стабільність', 'Зовнішня негативна: уникнення покарань, тиску або осуду'], best: 0 },
+          { q: '[КОС — комунікативні схильності] Наскільки легко ви встановлюєте контакт і взаємодієте з новими людьми?', opts: ['Легко ініціюю спілкування та підтримую діалог', 'Спілкуюсь впевнено після короткого знайомства', 'Волію мінімізувати контакти або складно вхожу в групу'], best: 0 },
+          { q: '[КОС — організаторські схильності] Як ви проявляєте себе при необхідності організувати групу для виконання задачі?', opts: ['Беру ініціативу, розподіляю ролі та контролюю хід', 'Допомагаю організувати роботу за дорученням', 'Віддаю перевагу виконувати завдання самостійно без координування'], best: 0 },
+          { q: '[ПФС — самооцінка стану] Оцініть свій поточний психофізіологічний стан (тонус, працездатність, спокій).', opts: ['Високий тонус, зібраність і готовність до дій', 'Середній стан, помірна втома', 'Знижений тонус, виражена втома або напруження'], best: 0 }
+        ]
+      },
+      negative_states_2016: {
+        id: 'negative_states_2016',
+        title: 'Адаптивність та психічні стани (2016)',
+        desc: 'Експрес-діагностика за мотивами БОО «Адаптивність-200» (депресивність, тривожність, адаптація)',
+        icon: 'activity',
+        questions: [
+          { q: '[Шкала емоційної стійкості / Д] Чи часто останнім часом ви відчуваєте пригніченість або втрату інтересу?', opts: ['Ні, настрій рівний і стабільний', 'Інколи бувають короткочасні спади настрою', 'Часто відчуваю пригніченість або апатію'], best: 0 },
+          { q: '[Шкала тривожності / ПР] Чи виникає у вас внутрішнє напруження або тривога без очевидної причини?', opts: ['Практично не виникає', 'Періодично, у напружені моменти', 'Часто або постійно супроводжує діяльність'], best: 0 },
+          { q: '[Шкала самоконтролю / КП] Наскільки добре ви контролюєте власні емоції та імпульсивні реакції?', opts: ['Добре контролюю емоції та поведінку', 'Переважно контролюю, за винятком крайніх ситуацій', 'Важко стримувати роздратування або емоційні сплески'], best: 0 },
+          { q: '[Соціально-психологічна адаптація / ДАП] Як швидко ви пристосовуєтесь до нових умов, навантажень і колективу?', opts: ['Швидко та адаптивно пристосовусь', 'Потребую певного часу, але адаптуюсь', 'Адаптація проходить важко, відчуваю дискомфорт'], best: 0 },
+          { q: '[Стресостійкість та відновлення / СР] Наскільки ефективно ви відновлюєтесь після стресових навантажень?', opts: ['Відновлююсь швидко і повноцінно', 'Відновлення займає більше часу, ніж зазвичай', 'Майже не вдається відновитися між навантаженнями'], best: 0 }
+        ]
+      },
+      mps: {
+        id: 'mps',
+        title: 'Морально-психологічний стан (МПС)',
+        desc: 'Оцінка рівня стресу, сну, згуртованості та ресурсу особового складу',
+        icon: 'heart-pulse',
+        questions: [
+          { q: 'Як ви оцінюєте якість та тривалість свого сну за останні 3 доби?', opts: ['Сплю достатньо, відновлююсь (низький ризик)', 'Сон переривчастий, відчуваю втому (помірний ризик)', 'Майже не сплю, постійне виснаження (високий ризик)'], best: 0 },
+          { q: 'Як би ви описали рівень психологічної напруги під час виконання завдань?', opts: ['Контрольований, дію зібрано', 'Періодично виникає тривожність', 'Відчуваю сильне перевантаження або паніку'], best: 0 },
+          { q: 'Який рівень довіри та взаємопідтримки у вашому безпосередньому колективі?', opts: ['Високий, покладаємось один на одного', 'Задовільний, але є напружені моменти', 'Низький, відчуваю ізольованість або конфлікти'], best: 0 },
+          { q: 'Чи розумієте ви поточні завдання підрозділу та свою роль у них?', opts: ['Так, завдання чіткі й зрозумілі', 'Частково, потребує уточнень', 'Ні, не розумію загальної картини'], best: 0 },
+          { q: 'Як часто за останній тиждень ви відчували емоційне вигорання чи байдужість?', opts: ['Рідко або взагалі не відчував', 'Іноді, після важких змін', 'Майже постійно'], best: 0 },
+          { q: 'Чи знаєте ви, до кого звернутися по психологічну або медичну допомогу в підрозділі?', opts: ['Так, знаю контакти і порядок звернення', 'Чув загалом, але не знаю деталей', 'Ні, не маю такої інформації'], best: 0 },
+          { q: 'Як ви оцінюєте власну здатність приймати рішення в умовах дефіциту часу?', opts: ['Впевнено приймаю рішення', 'Іноді вагаюсь, але справляюсь', 'Складно зосередитись і діяти'], best: 0 },
+          { q: 'Чи достатньо вам часу на базове відновлення між нарядами / виходами?', opts: ['Так, графік дозволяє відновитись', 'Не завжди вистачає часу', 'Категорично не вистачає часу на відпочинок'], best: 0 }
+        ]
+      },
+      tccc: {
+        id: 'tccc',
+        title: 'Тактична медицина (TCCC)',
+        desc: 'Протокол MARCH, турнікети, зупинка кровотечі та евакуація',
+        icon: 'heart',
+        questions: [
+          { q: 'Що є першочерговою дією за алгоритмом MARCH у зоні під вогнем (CUF)?', opts: ['Зупинка масивної кровотечі (турнікет) та переміщення в укриття', 'Перевірка прохідності дихальних шляхів', 'Оцінка свідомості та накладання пов’язки на груди'], best: 0 },
+          { q: 'Куди накладається турнікет при критичній кровотечі з кінцівки в червоній зоні?', opts: ['Максимально високо на кінцівку поверх одягу', 'Тільки на 5 см вище рани на голе тіло', 'Нижче місця поранення'], best: 0 },
+          { q: 'Скільки часу безпечно тримати турнікет накладеним до обов’язкової оцінки конверсії?', opts: ['До 2 годин', 'До 6 годин', 'Не більше 15 хвилин'], best: 0 },
+          { q: 'Що застосовується при відкритому пневмотораксі (пораненні грудної клітки)?', opts: ['Оклюзійна наліпка (вентильована/невентильована)', 'Тампонування рани гемостатиком', 'Туга еластична пов’язка навколо шиї'], best: 0 },
+          { q: 'Чому важлива профілактика гіпотермії навіть у теплу пору року?', opts: ['Крововтрата порушує терморегуляцію та згортання крові', 'Щоб поранений не заснув під час евакуації', 'Тільки для комфорту пораненого'], best: 0 },
+          { q: 'Де обов’язково фіксується час накладання турнікета?', opts: ['На білій стрічці турнікета та/або на лобі пораненого', 'Тільки усна передача санінструктору', 'На внутрішній стороні аптечки'], best: 0 },
+          { q: 'Який метод використовується для зупинки вузлової кровотечі (пах, шия, пахва)?', opts: ['Щільне тампонування гемостатичним бинтом + прямий тиск', 'Накладання стандартного турнікета', 'Охолодження рани водою'], best: 0 }
+        ]
+      },
+      cyber: {
+        id: 'cyber',
+        title: 'Інформаційна безпека та ІПСО',
+        desc: 'Кібергігієна, геолокація, захист зв’язку та розпізнавання ІПСО',
+        icon: 'shield',
+        questions: [
+          { q: 'Яку головну небезпеку несуть фото та відео з позицій, опубліковані в соцмережах?', opts: ['Метадані (EXIF) та орієнтири дозволяють ворогу визначити точні координати', 'Знижується заряд батареї пристрою', 'Порушуються авторські права платформи'], best: 0 },
+          { q: 'Як діяти при отриманні підозрілого файлу чи посилання в месенджері від невідомого контакту?', opts: ['Не відкривати, видалити та повідомити відповідального за кібербезпеку', 'Відкрити з резервного телефону', 'Переслати побратимам для перевірки'], best: 0 },
+          { q: 'Яка ознака найчастіше вказує на ворожу ІПСО у новинних каналах?', opts: ['Емоційний тиск, заклики до паніки або недовіри без верифікованих джерел', 'Наявність офіційного посилання на Генштаб', 'Сухий статистичний звіт'], best: 0 },
+          { q: 'Які налаштування мають бути вимкнені на особистому смартфоні в районі виконання завдань?', opts: ['Геолокація (GPS), Bluetooth, автоматичний пошук Wi-Fi та геомітки камери', 'Лише темна тема екрана', 'Тільки беззвучний режим'], best: 0 },
+          { q: 'Чи безпечно використовувати відкриті загальнодоступні Wi-Fi мережі для службового листування?', opts: ['Ні, трафік може перехоплюватися', 'Так, якщо мережа працює швидко', 'Так, у вечірній час'], best: 0 },
+          { q: 'Що робити при виявленні несанкціонованого входу в ваш обліковий запис месенджера?', opts: ['Завершити всі активні сеанси, змінити пароль, увімкнути 2FA та доповісти', 'Просто видалити чат', 'Ігнорувати, якщо повідомлення не зникли'], best: 0 }
+        ]
+      },
+      weapons: {
+        id: 'weapons',
+        title: 'Безпека зі зброєю та БК',
+        desc: 'Правила поводження зі зброєю, огляд та дії при затримках',
+        icon: 'target',
+        questions: [
+          { q: 'Яке перше правило безпечного поводження зі зброєю?', opts: ['Завжди поводитись зі зброєю так, ніби вона заряджена', 'Завжди тримати запобіжник знятим', 'Перевіряти зброю лише перед стрільбами'], best: 0 },
+          { q: 'Де повинен знаходитись вказівний палець стрільця до моменту прицілювання та рішення про постріл?', opts: ['Поза межами спускової скоби (уздовж ствольної коробки)', 'На спусковому гачку для швидкості', 'Під магазином'], best: 0 },
+          { q: 'У якій послідовності проводиться розряджання та огляд зброї?', opts: ['Від’єднати магазин -> відвести затвор -> оглянути патронник -> контрольний спуск в безпечному напрямку', 'Контрольний спуск -> від’єднати магазин', 'Поставити на запобіжник без від’єднання магазина'], best: 0 },
+          { q: 'Що потрібно зробити при виявленні нерозірваного боєприпасу (НБП)?', opts: ['Не наближатись, позначити місце та доповісти саперам / командуванню', 'Акуратно перенести в безпечне місце руками', 'Спробувати підірвати на місці самостійно'], best: 0 },
+          { q: 'У якому напрямку має бути спрямований ствол зброї під час будь-яких маніпуляцій?', opts: ['У безпечному напрямку (кулеуловлювач, земля під кутом)', 'Угору вертикально в приміщенні', 'У бік товариша при передачі'], best: 0 },
+          { q: 'Що робити при осічці під час стрільби?', opts: ['Утримувати зброю в безпечному напрямку, витримати паузу та усунути затримку за нормативом', 'Негайно заглянути в канал ствола', 'Кинути зброю на землю'], best: 0 }
+        ]
       }
-      const rows = sheet.getDataRange().getValues();
-      for (let i = rows.length - 1; i >= 1; i--) {
-        let sessionObj = null;
-        try { sessionObj = JSON.parse(rows[i][7]); } catch (err) {}
-        if (sessionObj && sessionObj.id) {
-          return jsonOut({ ok: true, session: sessionObj });
+    };
+
+    const state = {
+      activeTab: 'setup',
+      isRespondentLink: false,
+      config: {
+        apiUrl: '',
+        militaryUnit: 'ВЧ А5313',
+        unit: 'Відділення супроводження груп ПМП',
+        topicId: 'unit_survey_v3',
+        qCount: 5,
+        anonymity: 'anonymous'
+      },
+      session: null,
+      responses: [],
+      runner: {
+        started: false,
+        currentIdx: 0,
+        answers: [],
+        startTime: null
+      },
+      selectedFileKey: null,
+      charts: { risk: null, questions: null }
+    };
+
+    const STORAGE_KEY = 'unit_test_portal_state_v3';
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          config: state.config,
+          session: state.session,
+          responses: state.responses
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed.config) state.config = { ...state.config, ...parsed.config };
+        if (parsed.session) state.session = parsed.session;
+        if (Array.isArray(parsed.responses)) state.responses = parsed.responses;
+      } catch (e) {}
+    }
+
+    function applyRespondentModeUI() {
+      const nav = document.getElementById('main-nav');
+      if (state.isRespondentLink) {
+        nav.classList.add('hidden');
+      } else {
+        nav.classList.remove('hidden');
+      }
+    }
+
+    function getApiUrl() {
+      return (state.config.apiUrl || '').trim();
+    }
+
+    function updateApiStatusBadge() {
+      const badge = document.getElementById('api-status-badge');
+      const url = getApiUrl();
+      if (url) {
+        badge.textContent = 'Підключено';
+        badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800';
+      } else {
+        badge.textContent = 'Локально';
+        badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600';
+      }
+    }
+
+    async function apiPost(payload) {
+      const url = getApiUrl();
+      if (!url) return null;
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function apiGet(params = {}) {
+      const url = getApiUrl();
+      if (!url) return null;
+      try {
+        const sep = url.includes('?') ? '&' : '?';
+        const qs = new URLSearchParams(params).toString();
+        const res = await fetch(`${url}${sep}${qs}`, { cache: 'no-store' });
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function syncSummaryToGoogleSheet() {
+      const url = getApiUrl();
+      if (!url || !state.session || state.responses.length === 0) return Promise.resolve(null);
+      const analysis = analyzeData();
+      const problemsText = analysis.risks
+        .map((r, i) => `${i + 1}. ${r.title} | Проблема: ${r.text} | Рішення: ${r.solution}`)
+        .join('\n');
+      const recommendationsText = analysis.recommendations.join('\n');
+
+      return apiPost({
+        action: 'syncReport',
+        sessionId: state.session.id,
+        militaryUnit: state.session.militaryUnit || state.config.militaryUnit || '',
+        unit: state.session.unit || '',
+        topicTitle: state.session.topicTitle || '',
+        submittedCount: analysis.submittedCount,
+        avgScore: analysis.avgScore,
+        highRiskCount: analysis.riskCounts.high,
+        problemsText,
+        recommendationsText
+      });
+    }
+
+    async function syncPortalFromServer(silent = false) {
+      if (state.isRespondentLink) return;
+      if (!getApiUrl()) {
+        if (!silent) showToast('Вкажіть URL Google Apps Script у полі синхронізації');
+        return;
+      }
+
+      if (!state.session) {
+        const latest = await apiGet({ action: 'getLatestSession' });
+        if (latest && latest.session) {
+          state.session = latest.session;
+          saveState();
+          renderSessionCard();
         }
       }
-      return jsonOut({ ok: false, session: null });
-    }
 
-    if (action === 'getSession') {
-      const sheet = ss.getSheetByName(SHEET_SESSIONS);
-      if (!sheet || sheet.getLastRow() < 2) {
-        return jsonOut({ ok: false, session: null });
+      if (!state.session) {
+        if (!silent) showToast('Сесію ще не створено або не знайдено в таблиці');
+        return;
       }
-      const rows = sheet.getDataRange().getValues();
-      for (let i = rows.length - 1; i >= 1; i--) {
-        if (String(rows[i][0] || '').trim().toLowerCase() === sessionId) {
-          let sessionObj = null;
-          try { sessionObj = JSON.parse(rows[i][7]); } catch (err) {}
-          return jsonOut({ ok: true, session: sessionObj });
+
+      let data = await apiGet({ action: 'getResults', id: state.session.id });
+
+      if (!data || !Array.isArray(data.responses) || data.responses.length === 0) {
+        const allRes = await apiGet({ action: 'getResults' });
+        if (allRes && Array.isArray(allRes.responses) && allRes.responses.length > 0) {
+          data = allRes;
         }
       }
-      return jsonOut({ ok: false, session: null });
+
+      if (data && Array.isArray(data.responses)) {
+        if (data.responses.length > 0) {
+          state.responses = data.responses;
+          saveState();
+        }
+        document.getElementById('badge-count').textContent = state.responses.length;
+        renderPortalView();
+        if (!silent) showToast(`Оновлено з таблиці: ${state.responses.length} проходжень`);
+      } else if (!silent) {
+        showToast('Не вдалося отримати дані з таблиці (перевірте доступ «Все» у Apps Script)');
+      }
     }
 
-    if (action === 'getResults') {
-      const sheet = ss.getSheetByName(SHEET_RESPONSES);
-      if (!sheet || sheet.getLastRow() < 2) {
-        return jsonOut({ ok: true, responses: [] });
+    let toastTimer = null;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.add('hidden'), 3200);
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function computeRiskLevel(pct) {
+      if (pct >= 80) return { key: 'low', label: 'Низький', badge: 'bg-emerald-100 text-emerald-800' };
+      if (pct >= 55) return { key: 'med', label: 'Помірний', badge: 'bg-amber-100 text-amber-800' };
+      return { key: 'high', label: 'Високий', badge: 'bg-rose-100 text-rose-800' };
+    }
+
+    const CRC_TABLE = (() => {
+      const t = new Uint32Array(256);
+      for (let i = 0; i < 256; i++) {
+        let c = i;
+        for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+        t[i] = c;
       }
-      const rows = sheet.getDataRange().getValues();
-      const responses = [];
-      for (let i = 1; i < rows.length; i++) {
-        const rowSid = String(rows[i][0] || '').trim().toLowerCase();
-        if (!sessionId || rowSid === sessionId) {
-          let answersArr = [];
-          try { answersArr = JSON.parse(rows[i][10] || '[]'); } catch (err) {}
-          responses.push({
-            id: String(rows[i][1] || `RESP-${i}`),
-            participantLabel: String(rows[i][5] || 'Учасник'),
-            rank: String(rows[i][6] || 'Приховано'),
-            correctCount: Number(rows[i][7] || 0),
-            totalCount: Number(rows[i][8] || 0),
-            scorePct: Number(rows[i][9] || 0),
-            answers: answersArr,
-            riskLevel: String(rows[i][11] || 'med'),
-            submittedAt: String(rows[i][12] || ''),
-            durationSec: Number(rows[i][13] || 0)
+      return t;
+    })();
+
+    function crc32(bytes) {
+      let c = 0xffffffff;
+      for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+      return (c ^ 0xffffffff) >>> 0;
+    }
+
+    function createZipBlob(filesMap) {
+      const encoder = new TextEncoder();
+      const localParts = [];
+      const centralParts = [];
+      let offset = 0;
+
+      const entries = Object.entries(filesMap);
+      for (const [name, content] of entries) {
+        const nameBytes = encoder.encode(name);
+        const dataBytes = typeof content === 'string' ? encoder.encode(content) : content;
+        const crc = crc32(dataBytes);
+        const size = dataBytes.length;
+
+        const lh = new ArrayBuffer(30);
+        const lv = new DataView(lh);
+        lv.setUint32(0, 0x04034b50, true);
+        lv.setUint16(4, 20, true);
+        lv.setUint16(6, 0x0800, true);
+        lv.setUint16(8, 0, true);
+        lv.setUint16(10, 0, true);
+        lv.setUint16(12, 0, true);
+        lv.setUint32(14, crc, true);
+        lv.setUint32(18, size, true);
+        lv.setUint32(22, size, true);
+        lv.setUint16(26, nameBytes.length, true);
+        lv.setUint16(28, 0, true);
+
+        localParts.push(new Uint8Array(lh), nameBytes, dataBytes);
+
+        const ch = new ArrayBuffer(46);
+        const cv = new DataView(ch);
+        cv.setUint32(0, 0x02014b50, true);
+        cv.setUint16(4, 20, true);
+        cv.setUint16(6, 20, true);
+        cv.setUint16(8, 0x0800, true);
+        cv.setUint16(10, 0, true);
+        cv.setUint16(12, 0, true);
+        cv.setUint16(14, 0, true);
+        cv.setUint32(16, crc, true);
+        cv.setUint32(20, size, true);
+        cv.setUint32(24, size, true);
+        cv.setUint16(28, nameBytes.length, true);
+        cv.setUint16(30, 0, true);
+        cv.setUint16(32, 0, true);
+        cv.setUint16(34, 0, true);
+        cv.setUint16(36, 0, true);
+        cv.setUint32(38, 0, true);
+        cv.setUint32(42, offset, true);
+
+        centralParts.push(new Uint8Array(ch), nameBytes);
+        offset += 30 + nameBytes.length + size;
+      }
+
+      const centralSize = centralParts.reduce((s, p) => s + p.length, 0);
+      const eocd = new ArrayBuffer(22);
+      const ev = new DataView(eocd);
+      ev.setUint32(0, 0x06054b50, true);
+      ev.setUint16(4, 0, true);
+      ev.setUint16(6, 0, true);
+      ev.setUint16(8, entries.length, true);
+      ev.setUint16(10, entries.length, true);
+      ev.setUint32(12, centralSize, true);
+      ev.setUint32(16, offset, true);
+      ev.setUint16(20, 0, true);
+
+      return new Blob([...localParts, ...centralParts, new Uint8Array(eocd)], { type: 'application/zip' });
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function switchTab(tab) {
+      if (state.isRespondentLink && tab !== 'take') {
+        tab = 'take';
+      }
+      state.activeTab = tab;
+      ['setup', 'take', 'portal'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById(`nav-${t}`);
+        btn.classList.toggle('tab-active', t === tab);
+        btn.classList.toggle('tab-inactive', t !== tab);
+      });
+      if (tab === 'take') renderRunnerView();
+      if (tab === 'portal') {
+        renderPortalView();
+        syncPortalFromServer(true);
+      }
+      refreshIcons();
+    }
+
+    function renderTopicCards() {
+      const container = document.getElementById('topic-cards');
+      if (!container) return;
+      container.innerHTML = '';
+      const topics = Object.values(QUESTION_BANK);
+      const activeTopic = QUESTION_BANK[state.config.topicId] || topics[0];
+      state.config.topicId = activeTopic.id;
+
+      const badge = document.getElementById('selected-topic-badge');
+      if (badge) badge.textContent = `${activeTopic.title} (${activeTopic.questions.length} пит.)`;
+
+      topics.forEach(topic => {
+        const active = state.config.topicId === topic.id;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `text-left p-3.5 rounded-xl border transition flex items-start gap-3 ${active ? 'border-emerald-700 bg-emerald-50/70 ring-1 ring-emerald-700' : 'border-slate-200 hover:border-slate-300 bg-white'}`;
+        btn.innerHTML = `
+          <div class="w-8 h-8 rounded-lg ${active ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600'} flex items-center justify-center shrink-0 mt-0.5">
+            <i data-lucide="${topic.icon || 'book-open'}" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs sm:text-sm font-bold text-slate-900">${escHtml(topic.title)}</div>
+            <div class="text-[11px] text-slate-500 mt-0.5 line-clamp-2">${escHtml(topic.desc)} (${topic.questions.length} пит.)</div>
+          </div>
+        `;
+        btn.addEventListener('click', () => {
+          state.config.topicId = topic.id;
+          syncQuestionSlider();
+          renderTopicCards();
+          refreshIcons();
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function syncQuestionSlider() {
+      const slider = document.getElementById('range-qcount');
+      const countLabel = document.getElementById('label-qcount');
+      const maxLabel = document.getElementById('label-qmax');
+      if (!slider) return;
+
+      slider.min = 1;
+      slider.max = MAX_QUESTIONS_LIMIT;
+      if (state.config.qCount > MAX_QUESTIONS_LIMIT) state.config.qCount = MAX_QUESTIONS_LIMIT;
+      if (state.config.qCount < 1) state.config.qCount = 1;
+      slider.value = state.config.qCount;
+
+      if (countLabel) {
+        const n = state.config.qCount;
+        const word = n === 1 ? 'питання' : (n >= 2 && n <= 4 ? 'питання' : 'питань');
+        countLabel.textContent = `${n} ${word}`;
+      }
+      if (maxLabel) {
+        maxLabel.textContent = `Макс: ${MAX_QUESTIONS_LIMIT} питань`;
+      }
+    }
+
+    function syncAnonymityUI() {
+      const isAnon = state.config.anonymity === 'anonymous';
+      document.getElementById('anon-card-true').className = `cursor-pointer border rounded-xl p-3.5 flex items-start gap-3 transition ${isAnon ? 'border-emerald-700 bg-emerald-50/60 ring-1 ring-emerald-700' : 'border-slate-200 bg-white'}`;
+      document.getElementById('anon-card-false').className = `cursor-pointer border rounded-xl p-3.5 flex items-start gap-3 transition ${!isAnon ? 'border-emerald-700 bg-emerald-50/60 ring-1 ring-emerald-700' : 'border-slate-200 bg-white'}`;
+    }
+
+    function renderSessionCard() {
+      const s = state.session;
+      const badge = document.getElementById('session-status-pill');
+      const linkInput = document.getElementById('input-share-link');
+      const btnCopy = document.getElementById('btn-copy-link');
+      const btnDispatch = document.getElementById('btn-dispatch-unit');
+      const btnOpen = document.getElementById('btn-open-test-now');
+
+      if (!s) {
+        badge.textContent = 'Очікує формування';
+        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
+        return;
+      }
+
+      badge.textContent = 'Активна сесія';
+      badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
+      document.getElementById('sum-id').textContent = s.id;
+      document.getElementById('sum-mil-unit').textContent = s.militaryUnit || '—';
+      document.getElementById('sum-unit').textContent = s.unit;
+      document.getElementById('sum-topic').textContent = s.topicTitle;
+      document.getElementById('sum-meta').textContent = `${s.qCount} пит. • ${s.anonymity === 'anonymous' ? 'Анонімно' : 'Персоніфіковано'}`;
+
+      linkInput.value = s.link;
+      btnCopy.disabled = false;
+      btnDispatch.disabled = false;
+      btnOpen.disabled = false;
+      document.getElementById('badge-count').textContent = state.responses.length;
+    }
+
+    function renderRunnerView() {
+      const empty = document.getElementById('test-empty-state');
+      const card = document.getElementById('test-runner-card');
+      if (!state.session) {
+        empty.classList.remove('hidden');
+        card.classList.add('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      card.classList.remove('hidden');
+
+      const s = state.session;
+      document.getElementById('runner-unit').textContent = s.militaryUnit ? `${s.militaryUnit} • ${s.unit}` : s.unit;
+      document.getElementById('runner-topic').textContent = s.topicTitle;
+      document.getElementById('runner-anon-badge').textContent = s.anonymity === 'anonymous' ? 'Анонімно' : 'Персоніфіковано';
+
+      const isNamed = s.anonymity === 'named';
+      document.getElementById('runner-named-fields').classList.toggle('hidden', !isNamed);
+      document.getElementById('runner-anon-notice').classList.toggle('hidden', isNamed);
+
+      if (!state.runner.started) {
+        document.getElementById('runner-intro').classList.remove('hidden');
+        document.getElementById('runner-questions').classList.add('hidden');
+        document.getElementById('runner-done').classList.add('hidden');
+        document.getElementById('runner-progress-badge').textContent = `0 / ${s.questions.length}`;
+      }
+    }
+
+    function renderCurrentQuestion() {
+      const s = state.session;
+      const idx = state.runner.currentIdx;
+      const qObj = s.questions[idx];
+      const total = s.questions.length;
+
+      document.getElementById('runner-progress-badge').textContent = `${idx + 1} / ${total}`;
+      document.getElementById('runner-progress-bar').style.width = `${Math.round(((idx + 1) / total) * 100)}%`;
+
+      const container = document.getElementById('question-container');
+      const chosen = state.runner.answers[idx];
+      container.innerHTML = `
+        <div class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Питання ${idx + 1} з ${total}</div>
+        <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">${escHtml(qObj.q)}</h3>
+        <div class="space-y-2.5 pt-2" id="q-options-list"></div>
+      `;
+
+      const optList = document.getElementById('q-options-list');
+      qObj.opts.forEach((optText, oIdx) => {
+        const selected = chosen === oIdx;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `w-full text-left p-3.5 rounded-xl border text-sm transition flex items-center gap-3 ${selected ? 'border-emerald-700 bg-emerald-50 text-emerald-950 font-semibold ring-1 ring-emerald-700' : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'}`;
+        btn.innerHTML = `
+          <span class="w-6 h-6 rounded-full border flex items-center justify-center text-xs shrink-0 ${selected ? 'bg-emerald-700 border-emerald-700 text-white' : 'border-slate-300 text-slate-500'}">${String.fromCharCode(65 + oIdx)}</span>
+          <span>${escHtml(optText)}</span>
+        `;
+        btn.addEventListener('click', () => {
+          state.runner.answers[idx] = oIdx;
+          renderCurrentQuestion();
+        });
+        optList.appendChild(btn);
+      });
+
+      document.getElementById('btn-prev-q').disabled = idx === 0;
+      const isLast = idx === total - 1;
+      document.getElementById('btn-next-q').classList.toggle('hidden', isLast);
+      document.getElementById('btn-submit-quiz').classList.toggle('hidden', !isLast);
+    }
+
+    function submitQuizResponse() {
+      const s = state.session;
+      const unanswered = state.runner.answers.findIndex(a => a === null || a === undefined);
+      if (unanswered !== -1) {
+        state.runner.currentIdx = unanswered;
+        renderCurrentQuestion();
+        showToast(`Будь ласка, дайте відповідь на питання №${unanswered + 1}`);
+        return;
+      }
+
+      let correctCount = 0;
+      s.questions.forEach((q, i) => {
+        if (state.runner.answers[i] === q.best) correctCount++;
+      });
+      const scorePct = Math.round((correctCount / s.questions.length) * 100);
+      const risk = computeRiskLevel(scorePct);
+      const num = state.responses.length + 1;
+      const isAnon = s.anonymity === 'anonymous';
+      const nameVal = document.getElementById('resp-name').value.trim();
+      const rankVal = document.getElementById('resp-rank').value;
+
+      const record = {
+        id: `RESP-${String(num).padStart(3, '0')}`,
+        participantLabel: isAnon ? `Учасник #${String(num).padStart(2, '0')} (Анонімно)` : nameVal,
+        rank: isAnon ? 'Приховано' : rankVal,
+        answers: [...state.runner.answers],
+        correctCount,
+        totalCount: s.questions.length,
+        scorePct,
+        riskLevel: risk.key,
+        submittedAt: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        durationSec: Math.max(12, Math.round((Date.now() - state.runner.startTime) / 1000))
+      };
+
+      state.responses.push(record);
+      saveState();
+      document.getElementById('badge-count').textContent = state.responses.length;
+
+      if (getApiUrl()) {
+        apiPost({
+          action: 'submitResponse',
+          sessionId: s.id,
+          militaryUnit: s.militaryUnit || state.config.militaryUnit || '',
+          unit: s.unit || '',
+          response: record
+        }).then(() => syncSummaryToGoogleSheet());
+      }
+
+      document.getElementById('runner-questions').classList.add('hidden');
+      document.getElementById('runner-done').classList.remove('hidden');
+      document.getElementById('runner-done-desc').textContent =
+        `Відповіді за темою «${s.topicTitle}» успішно відправлено. Звіт доступний лише керівнику / адміністратору порталу.`;
+      showToast('Відповіді успішно відправлено!');
+    }
+
+    function analyzeData() {
+      const s = state.session;
+      const resps = state.responses;
+      if (!s || resps.length === 0) {
+        return {
+          submittedCount: 0, avgScore: 0, riskCounts: { low: 0, med: 0, high: 0 },
+          qStats: [], problematicQuestions: [], risks: [], recommendations: []
+        };
+      }
+
+      const submittedCount = resps.length;
+      const avgScore = Math.round(resps.reduce((sum, r) => sum + r.scorePct, 0) / submittedCount);
+      const riskCounts = { low: 0, med: 0, high: 0 };
+      resps.forEach(r => riskCounts[r.riskLevel]++);
+
+      const qStats = s.questions.map((q, idx) => {
+        let ok = 0;
+        const deviationDetails = [];
+        const optionCounts = q.opts.map(() => 0);
+
+        resps.forEach(r => {
+          const ansIdx = (r.answers && r.answers[idx] !== undefined) ? r.answers[idx] : null;
+          if (ansIdx !== null && optionCounts[ansIdx] !== undefined) {
+            optionCounts[ansIdx]++;
+          }
+          if (ansIdx === q.best) {
+            ok++;
+          } else {
+            deviationDetails.push({
+              participant: r.participantLabel,
+              rank: r.rank,
+              chosenOption: q.opts[ansIdx] || 'Без відповіді'
+            });
+          }
+        });
+
+        const pct = Math.round((ok / submittedCount) * 100);
+        const failPct = 100 - pct;
+        const isProblematic = pct < 75;
+        const severity = pct < 55 ? 'Висока критичність' : (pct < 75 ? 'Помірна критичність' : 'Норма');
+
+        const proposedSolution = pct < 55
+          ? `Провести цільове роз’яснювальне заняття та індивідуальну роботу з особовим складом щодо питання №${idx + 1}; довести правильний порядок дій («${q.opts[q.best]}») та перевірити засвоєння через повторний контроль.`
+          : pct < 75
+          ? `Включити розбір питання №${idx + 1} до планового інструктажу / години інформування підрозділу, акцентувавши увагу на нормативному варіанті: «${q.opts[q.best]}».`
+          : `Показник у межах норми. Підтримувати поточний рівень поінформованості під час планових заходів.`;
+
+        return {
+          num: idx + 1,
+          question: q.q,
+          optimalOption: q.opts[q.best],
+          okCount: ok,
+          failCount: submittedCount - ok,
+          pct,
+          failPct,
+          isProblematic,
+          severity,
+          optionBreakdown: q.opts.map((optText, oIdx) => ({
+            text: optText,
+            count: optionCounts[oIdx],
+            pct: Math.round((optionCounts[oIdx] / submittedCount) * 100),
+            isBest: oIdx === q.best
+          })),
+          deviationDetails,
+          proposedSolution
+        };
+      });
+
+      const problematicQuestions = qStats.filter(q => q.isProblematic);
+      const risks = [];
+      const recommendations = [];
+
+      if (riskCounts.high > 0) {
+        const highNames = resps.filter(r => r.riskLevel === 'high').map(r => r.participantLabel).join(', ');
+        risks.push({
+          level: 'high',
+          title: `Група високого ризику (${riskCounts.high} учасн. / ${Math.round((riskCounts.high / submittedCount) * 100)}%)`,
+          text: `Виявлено ${riskCounts.high} учасн. (${Math.round((riskCounts.high / submittedCount) * 100)}%) із високим рівнем ризику (< 55% оптимальних відповідей): ${highNames}.`,
+          solution: 'Провести першочергову індивідуальну бесіду, психологічну/правову консультацію та додатковий цільовий інструктаж з кожним учасником групи високого ризику з фіксацією результатів у журналі обліку.'
+        });
+        recommendations.push('1. Першочергово провести індивідуальну бесіду, консультацію або додатковий інструктаж з учасниками групи високого ризику (' + highNames + ').');
+      }
+
+      if (riskCounts.med > 0) {
+        const medNames = resps.filter(r => r.riskLevel === 'med').map(r => r.participantLabel).join(', ');
+        risks.push({
+          level: 'med',
+          title: `Група помірного ризику (${riskCounts.med} учасн. / ${Math.round((riskCounts.med / submittedCount) * 100)}%)`,
+          text: `${riskCounts.med} учасн. перебувають у зоні помірного ризику (55–79%), що свідчить про окремі проблемні питання або прогалини: ${medNames}.`,
+          solution: 'Організувати групове роз’яснення по виявлених прогалинах та забезпечити зворотний зв’язок від командирів підрозділів.'
+        });
+        recommendations.push('2. Організувати додаткове інформування та груповий розбір складних питань для учасників із помірним рівнем ризику.');
+      }
+
+      if (problematicQuestions.length > 0) {
+        problematicQuestions.forEach(wq => {
+          const devSummary = wq.deviationDetails.map(d => `${d.participant} («${d.chosenOption}»)`).join('; ');
+          risks.push({
+            level: wq.pct < 55 ? 'high' : 'med',
+            title: `Проблемне питання №${wq.num} — відхилення у ${wq.failCount} з ${submittedCount} учасн. (${wq.failPct}%)`,
+            text: `Питання №${wq.num}: «${wq.question}». Оптимальний показник: ${wq.pct}%. Виявлені відхилення: ${devSummary || '—'}.`,
+            solution: wq.proposedSolution
           });
+        });
+        recommendations.push(`3. Провести цільове опрацювання проблемних питань (${problematicQuestions.map(w => '№' + w.num).join(', ')}) на заняттях з підготовки та інформування особового складу.`);
+      }
+
+      if (risks.length === 0) {
+        risks.push({
+          level: 'low',
+          title: 'Критичних проблемних питань не виявлено',
+          text: 'Показники за всіма питаннями знаходяться в межах допустимої норми (≥ 75% оптимальних відповідей).',
+          solution: 'Підтримувати досягнутий рівень підготовки та проводити плановий моніторинг.'
+        });
+      }
+
+      if (recommendations.length === 0) {
+        recommendations.push('Підтримувати поточний рівень підготовки та проводити планові повторні заміри у підрозділі.');
+      } else {
+        recommendations.push('4. Провести контрольний повторний замір у підрозділі через 7–14 діб після реалізації заходів реагування.');
+      }
+
+      return { submittedCount, avgScore, riskCounts, qStats, problematicQuestions, risks, recommendations };
+    }
+
+    function generateWordReportHtml() {
+      const s = state.session;
+      const resps = state.responses;
+      const analysis = analyzeData();
+      const nowStr = new Date().toLocaleString('uk-UA');
+
+      const participantsRows = resps.map((r, i) => `
+        <tr>
+          <td style="text-align:center;">${i + 1}</td>
+          <td>${escHtml(r.participantLabel)}</td>
+          <td>${escHtml(r.rank)}</td>
+          <td style="text-align:center;">${r.correctCount} / ${r.totalCount} (${r.scorePct}%)</td>
+          <td style="text-align:center;">${computeRiskLevel(r.scorePct).label}</td>
+          <td style="text-align:center;">${r.submittedAt}</td>
+        </tr>`).join('');
+
+      const problemsRows = analysis.qStats.map(q => {
+        const devList = q.deviationDetails.length
+          ? q.deviationDetails.map(d => `• ${escHtml(d.participant)} (${escHtml(d.rank)}): «${escHtml(d.chosenOption)}»`).join('<br>')
+          : 'Відхилень не зафіксовано';
+        return `
+        <tr>
+          <td style="text-align:center;font-weight:bold;">№${q.num}</td>
+          <td><b>${escHtml(q.question)}</b><br><span style="color:#1e3a2f;">Оптимальна відповідь: «${escHtml(q.optimalOption)}»</span></td>
+          <td style="text-align:center;">${q.okCount}/${analysis.submittedCount} (${q.pct}%)<br><b>Статус:</b> ${q.severity}</td>
+          <td>${devList}</td>
+          <td>${escHtml(q.proposedSolution)}</td>
+        </tr>`;
+      }).join('');
+
+      const individualProtocols = resps.map((r, idx) => {
+        const qLines = s.questions.map((q, qIdx) => {
+          const ansIdx = r.answers[qIdx];
+          const isOk = ansIdx === q.best;
+          return `<tr>
+            <td style="text-align:center;">${qIdx + 1}</td>
+            <td>${escHtml(q.q)}</td>
+            <td>${escHtml(q.opts[ansIdx] || '—')}</td>
+            <td style="color:${isOk ? '#15803d' : '#b91c1c'};font-weight:bold;">${isOk ? 'Оптимально' : 'Потребує уваги (Оптимально: ' + escHtml(q.opts[q.best]) + ')'}</td>
+          </tr>`;
+        }).join('');
+
+        return `
+          <div style="page-break-inside:avoid;margin-top:18px;">
+            <h3 style="color:#1e3a2f;margin-bottom:6px;">Протокол №${idx + 1}: ${escHtml(r.participantLabel)} (${escHtml(r.rank)})</h3>
+            <p style="font-size:11pt;margin:0 0 6px 0;"><b>Результат:</b> ${r.correctCount} з ${r.totalCount} (${r.scorePct}%) | <b>Рівень ризику:</b> ${computeRiskLevel(r.scorePct).label} | <b>Час подачі:</b> ${r.submittedAt}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:6%;">№</th>
+                  <th style="width:36%;">Питання</th>
+                  <th style="width:29%;">Обрана відповідь</th>
+                  <th style="width:29%;">Оцінка / Примітка</th>
+                </tr>
+              </thead>
+              <tbody>${qLines}</tbody>
+            </table>
+          </div>
+        `;
+      }).join('');
+
+      return `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<title>Звіт за результатами тестування — ${escHtml(s.unit)}</title>
+<style>
+  @page { size: A4 portrait; margin: 1.8cm 1.5cm 1.8cm 2cm; }
+  body { font-family: "Times New Roman", Times, serif; font-size: 12pt; color: #0f172a; line-height: 1.35; }
+  h1 { font-size: 15pt; text-align: center; color: #1e3a2f; text-transform: uppercase; margin-bottom: 12px; }
+  h2 { font-size: 13pt; color: #1e3a2f; border-bottom: 1px solid #94a3b8; padding-bottom: 3px; margin-top: 18px; }
+  h3 { font-size: 12pt; color: #1e3a2f; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 12px; font-size: 10.5pt; }
+  th, td { border: 1px solid #475569; padding: 5px 7px; vertical-align: top; }
+  th { background-color: #e2e8f0; font-weight: bold; text-align: center; }
+  .meta-table td { border: 1px solid #94a3b8; padding: 5px 8px; }
+  .box { border: 1px solid #64748b; background-color: #f8fafc; padding: 10px 12px; margin: 10px 0; }
+</style>
+</head>
+<body>
+  <h1>АНАЛІТИЧНИЙ ЗВІТ<br>ЗА РЕЗУЛЬТАТАМИ ТЕСТУВАННЯ / ОПИТУВАННЯ ОСОБОВОГО СКЛАДУ</h1>
+
+  <table class="meta-table">
+    <tr><td style="width:32%;font-weight:bold;">Військова частина:</td><td>${escHtml(s.militaryUnit || '—')}</td></tr>
+    <tr><td style="font-weight:bold;">Підрозділ:</td><td>${escHtml(s.unit)}</td></tr>
+    <tr><td style="font-weight:bold;">Тема тестування / опитування:</td><td>${escHtml(s.topicTitle)}</td></tr>
+    <tr><td style="font-weight:bold;">ID сесії / Режим проведення:</td><td>${escHtml(s.id)} / ${s.anonymity === 'anonymous' ? 'Анонімно' : 'Персоніфіковано'}</td></tr>
+    <tr><td style="font-weight:bold;">Кількість питань у тесті:</td><td>${s.qCount}</td></tr>
+    <tr><td style="font-weight:bold;">Охоплено учасників (подано анкет):</td><td>${analysis.submittedCount} осіб</td></tr>
+    <tr><td style="font-weight:bold;">Середній показник оптимальності:</td><td><b>${analysis.avgScore}%</b> (Низький ризик: ${analysis.riskCounts.low} ос., Помірний ризик: ${analysis.riskCounts.med} ос., Високий ризик: ${analysis.riskCounts.high} ос.)</td></tr>
+    <tr><td style="font-weight:bold;">Дата та час формування звіту:</td><td>${nowStr}</td></tr>
+  </table>
+
+  <h2>1. ПОВНИЙ ОПИС ВИЯВЛЕНИХ ПРОБЛЕМНИХ ПИТАНЬ ТА РИЗИКІВ</h2>
+  ${analysis.risks.map((r, idx) => `
+    <div class="box">
+      <p style="margin:0 0 4px 0;"><b>1.${idx + 1}. ${escHtml(r.title)}</b></p>
+      <p style="margin:0 0 4px 0;"><b>Суть виявленої проблеми:</b> ${escHtml(r.text)}</p>
+      <p style="margin:0;"><b>Рекомендований спосіб усунення:</b> ${escHtml(r.solution)}</p>
+    </div>
+  `).join('')}
+
+  <h2>2. ДЕТАЛЬНИЙ АНАЛІЗ ПО КОЖНОМУ ПИТАННЮ ТА ПРОПОЗИЦІЇ ЩОДО ВИРІШЕННЯ</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:6%;">№</th>
+        <th style="width:27%;">Зміст питання та оптимальний варіант</th>
+        <th style="width:15%;">Показник / Статус</th>
+        <th style="width:24%;">Хто та які відхилення обрав</th>
+        <th style="width:28%;">Пропозиції щодо вирішення</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${problemsRows}
+    </tbody>
+  </table>
+
+  <h2>3. УЗАГАЛЬНЕНІ ПРОПОЗИЦІЇ ТА ПЛАН ЗАХОДІВ РЕАГУВАННЯ</h2>
+  <div class="box">
+    ${analysis.recommendations.map(rec => `<p style="margin:4px 0;">${escHtml(rec)}</p>`).join('')}
+  </div>
+
+  <h2>4. ЗВЕДЕНА ВІДОМІСТЬ РЕЗУЛЬТАТІВ УЧАСНИКІВ</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:6%;">№</th>
+        <th style="width:30%;">Учасник / Ідентифікатор</th>
+        <th style="width:18%;">Військове звання</th>
+        <th style="width:18%;">Результат</th>
+        <th style="width:15%;">Рівень ризику</th>
+        <th style="width:13%;">Час подачі</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${participantsRows}
+    </tbody>
+  </table>
+
+  <h2>5. ІНДИВІДУАЛЬНІ ПРОТОКОЛИ ВІДПОВІДЕЙ УЧАСНИКІВ</h2>
+  ${individualProtocols}
+
+  <p style="margin-top:24px;">Відповідальна особа: _______________________ / _______________________ /</p>
+</body>
+</html>`;
+    }
+
+    function generateExcelReportHtml() {
+      const s = state.session;
+      const resps = state.responses;
+      const analysis = analyzeData();
+      const nowStr = new Date().toLocaleString('uk-UA');
+
+      const summarySheetRows = `
+        <tr><th colspan="4" style="background:#1e3a2f;color:#ffffff;font-size:14pt;height:32px;">ЗВІТ ЗА РЕЗУЛЬТАТАМИ ТЕСТУВАННЯ ТА АНАЛІЗ ПРОБЛЕМНИХ ПИТАНЬ</th></tr>
+        <tr><td style="font-weight:bold;background:#f1f5f9;">Військова частина</td><td>${escHtml(s.militaryUnit || '—')}</td><td style="font-weight:bold;background:#f1f5f9;">Дата звіту</td><td>${nowStr}</td></tr>
+        <tr><td style="font-weight:bold;background:#f1f5f9;">Підрозділ</td><td>${escHtml(s.unit)}</td><td style="font-weight:bold;background:#f1f5f9;">ID сесії</td><td>${escHtml(s.id)}</td></tr>
+        <tr><td style="font-weight:bold;background:#f1f5f9;">Тема тестування</td><td>${escHtml(s.topicTitle)}</td><td style="font-weight:bold;background:#f1f5f9;">Режим</td><td>${s.anonymity === 'anonymous' ? 'Анонімно' : 'Персоніфіковано'}</td></tr>
+        <tr><td style="font-weight:bold;background:#f1f5f9;">Подано тестів</td><td>${analysis.submittedCount}</td><td style="font-weight:bold;background:#f1f5f9;">Середній бал</td><td>${analysis.avgScore}%</td></tr>
+        <tr><td style="font-weight:bold;background:#f1f5f9;">Низький ризик</td><td>${analysis.riskCounts.low}</td><td style="font-weight:bold;background:#f1f5f9;">Помірний / Високий ризик</td><td>${analysis.riskCounts.med} / ${analysis.riskCounts.high}</td></tr>
+        <tr><td colspan="4"></td></tr>
+        <tr><th colspan="4" style="background:#991b1b;color:#ffffff;font-size:12pt;">ПОВНИЙ ОПИС ВИЯВЛЕНИХ ПРОБЛЕМНИХ ПИТАНЬ ТА ПРОПОЗИЦІЙ ЇХ ВИРІШЕННЯ</th></tr>
+        <tr style="background:#e2e8f0;font-weight:bold;">
+          <th>№</th>
+          <th>Проблемне питання / Виявлений ризик</th>
+          <th>Детальний опис проблеми та відхилень</th>
+          <th>Пропозиції щодо вирішення</th>
+        </tr>
+        ${analysis.risks.map((r, i) => `
+          <tr>
+            <td style="text-align:center;">${i + 1}</td>
+            <td style="font-weight:bold;">${escHtml(r.title)}</td>
+            <td>${escHtml(r.text)}</td>
+            <td>${escHtml(r.solution)}</td>
+          </tr>
+        `).join('')}
+        <tr><td colspan="4"></td></tr>
+        <tr><th colspan="4" style="background:#1e3a2f;color:#ffffff;font-size:12pt;">УЗАГАЛЬНЕНИЙ ПЛАН ЗАХОДІВ РЕАГУВАННЯ</th></tr>
+        ${analysis.recommendations.map((rec, i) => `
+          <tr>
+            <td style="text-align:center;">${i + 1}</td>
+            <td colspan="3">${escHtml(rec)}</td>
+          </tr>
+        `).join('')}
+      `;
+
+      const questionAnalysisRows = `
+        <tr><th colspan="7" style="background:#1e3a2f;color:#ffffff;font-size:13pt;">ДЕТАЛЬНИЙ АНАЛІЗ ПО КОЖНОМУ ПИТАННЮ</th></tr>
+        <tr style="background:#e2e8f0;font-weight:bold;">
+          <th>№ питання</th>
+          <th>Формулювання питання</th>
+          <th>Оптимальна відповідь</th>
+          <th>Оптимальних (%)</th>
+          <th>Відхилень (%)</th>
+          <th>Статус / Критичність</th>
+          <th>Учасники з відхиленнями та пропозиція вирішення</th>
+        </tr>
+        ${analysis.qStats.map(q => {
+          const devs = q.deviationDetails.length
+            ? q.deviationDetails.map(d => `${d.participant}: «${d.chosenOption}»`).join('; ')
+            : 'Немає';
+          return `
+            <tr>
+              <td style="text-align:center;">${q.num}</td>
+              <td>${escHtml(q.question)}</td>
+              <td>${escHtml(q.optimalOption)}</td>
+              <td style="text-align:center;">${q.pct}% (${q.okCount}/${analysis.submittedCount})</td>
+              <td style="text-align:center;">${q.failPct}% (${q.failCount}/${analysis.submittedCount})</td>
+              <td style="text-align:center;font-weight:bold;color:${q.pct < 55 ? '#b91c1c' : q.pct < 75 ? '#b45309' : '#15803d'};">${q.severity}</td>
+              <td><b>Відхилення:</b> ${escHtml(devs)}<br><b>Пропозиція:</b> ${escHtml(q.proposedSolution)}</td>
+            </tr>
+          `;
+        }).join('')}
+      `;
+
+      const participantsTableRows = `
+        <tr><th colspan="8" style="background:#1e3a2f;color:#ffffff;font-size:13pt;">ЗВЕДЕНА ТАБЛИЦЯ УЧАСНИКІВ</th></tr>
+        <tr style="background:#e2e8f0;font-weight:bold;">
+          <th>№</th>
+          <th>Учасник / ID</th>
+          <th>Звання</th>
+          <th>Оптимальних відповідей</th>
+          <th>Всього питань</th>
+          <th>Відсоток</th>
+          <th>Рівень ризику</th>
+          <th>Час подачі</th>
+        </tr>
+        ${resps.map((r, i) => `
+          <tr>
+            <td style="text-align:center;">${i + 1}</td>
+            <td>${escHtml(r.participantLabel)}</td>
+            <td>${escHtml(r.rank)}</td>
+            <td style="text-align:center;">${r.correctCount}</td>
+            <td style="text-align:center;">${r.totalCount}</td>
+            <td style="text-align:center;">${r.scorePct}%</td>
+            <td style="text-align:center;">${computeRiskLevel(r.scorePct).label}</td>
+            <td style="text-align:center;">${r.submittedAt}</td>
+          </tr>
+        `).join('')}
+      `;
+
+      const detailAnswersHeader = s.questions.map((q, i) => `<th>Пит. ${i + 1}: ${escHtml(q.q)}</th>`).join('');
+      const detailAnswersRows = resps.map((r, i) => {
+        const cells = s.questions.map((q, qIdx) => {
+          const ansIdx = r.answers[qIdx];
+          const isOk = ansIdx === q.best;
+          return `<td style="background:${isOk ? '#dcfce7' : '#fee2e2'};">${escHtml(q.opts[ansIdx] || '—')} (${isOk ? 'Оптимально' : 'Відхилення'})</td>`;
+        }).join('');
+        return `<tr><td style="text-align:center;">${i + 1}</td><td>${escHtml(r.participantLabel)}</td>${cells}</tr>`;
+      }).join('');
+
+      return `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<!--[if gte mso 9]><xml>
+<x:ExcelWorkbook>
+  <x:ExcelWorksheets>
+    <x:ExcelWorksheet>
+      <x:Name>Звіт та проблеми</x:Name>
+      <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+    </x:ExcelWorksheet>
+    <x:ExcelWorksheet>
+      <x:Name>Аналіз питань</x:Name>
+      <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+    </x:ExcelWorksheet>
+    <x:ExcelWorksheet>
+      <x:Name>Учасники</x:Name>
+      <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+    </x:ExcelWorksheet>
+    <x:ExcelWorksheet>
+      <x:Name>Деталізація відповідей</x:Name>
+      <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+    </x:ExcelWorksheet>
+  </x:ExcelWorksheets>
+</x:ExcelWorkbook>
+</xml><![endif]-->
+<style>
+  body, table { font-family: Calibri, Arial, sans-serif; font-size: 11pt; }
+  table { border-collapse: collapse; margin-bottom: 20px; width: 100%; }
+  th, td { border: 1px solid #94a3b8; padding: 6px 8px; vertical-align: top; }
+</style>
+</head>
+<body>
+  <table>${summarySheetRows}</table>
+  <table>${questionAnalysisRows}</table>
+  <table>${participantsTableRows}</table>
+  <table>
+    <tr><th colspan="${s.questions.length + 2}" style="background:#1e3a2f;color:#ffffff;font-size:13pt;">МАТРИЦЯ ВІДПОВІДЕЙ УЧАСНИКІВ</th></tr>
+    <tr style="background:#e2e8f0;font-weight:bold;"><th>№</th><th>Учасник / ID</th>${detailAnswersHeader}</tr>
+    ${detailAnswersRows}
+  </table>
+</body>
+</html>`;
+    }
+
+    function buildVirtualFolder() {
+      const s = state.session;
+      const resps = state.responses;
+      if (!s) return { folderName: 'Звіт_Підрозділу', files: {} };
+
+      const safeUnit = s.unit.replace(/[^\p{L}\p{N}_-]+/gu, '_');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const folderName = `Звіт_${safeUnit}_${dateStr}`;
+      const analysis = analyzeData();
+      const files = {};
+
+      files[`${folderName}/00_Аналітичний_звіт_Word.doc`] = generateWordReportHtml();
+      files[`${folderName}/01_Зведена_таблиця_Excel.xls`] = generateExcelReportHtml();
+
+      const summaryTxt = [
+        `АНАЛІТИЧНИЙ ЗВІТ ЗА РЕЗУЛЬТАТАМИ ТЕСТУВАННЯ`,
+        `==================================================`,
+        `Військова частина: ${s.militaryUnit || '—'}`,
+        `Підрозділ: ${s.unit}`,
+        `Тема: ${s.topicTitle}`,
+        `Сесія: ${s.id} (${s.anonymity === 'anonymous' ? 'Анонімно' : 'Персоніфіковано'})`,
+        `Подано тестів: ${resps.length} | Середній бал: ${analysis.avgScore}%`,
+        ``,
+        `1. ПОВНИЙ ОПИС ПРОБЛЕМНИХ ПИТАНЬ ТА РИЗИКІВ:`,
+        ...analysis.risks.map((r, i) => `\n[${i + 1}] ${r.title}\n    Проблема: ${r.text}\n    Пропозиція вирішення: ${r.solution}`),
+        ``,
+        `2. УЗАГАЛЬНЕНІ ПРОПОЗИЦІЇ ТА ЗАХОДИ:`,
+        ...analysis.recommendations.map(rec => `• ${rec}`)
+      ].join('\n');
+
+      files[`${folderName}/02_Опис_проблем_і_пропозицій.txt`] = summaryTxt;
+
+      resps.forEach((r, idx) => {
+        const cleanName = r.participantLabel.replace(/[^\p{L}\p{N}_-]+/gu, '_').slice(0, 32);
+        const lines = [
+          `ІНДИВІДУАЛЬНИЙ ПРОТОКОЛ ВІДПОВІДЕЙ`,
+          `====================================`,
+          `Сесія: ${s.id}`,
+          `Військова частина: ${s.militaryUnit || '—'}`,
+          `Підрозділ: ${s.unit}`,
+          `Тема: ${s.topicTitle}`,
+          `Учасник: ${r.participantLabel}`,
+          `Звання: ${r.rank}`,
+          `Час подачі: ${r.submittedAt} (тривалість: ${r.durationSec} сек)`,
+          `Результат: ${r.correctCount} з ${r.totalCount} (${r.scorePct}%)`,
+          `Рівень ризику: ${computeRiskLevel(r.scorePct).label}`,
+          ``,
+          `ДЕТАЛІЗАЦІЯ ВІДПОВІДЕЙ:`,
+          ...s.questions.map((q, qIdx) => {
+            const ansIdx = r.answers[qIdx];
+            const isOk = ansIdx === q.best;
+            return `\n${qIdx + 1}. ${q.q}\n   Обрана відповідь: ${q.opts[ansIdx] || '—'}\n   Оцінка: ${isOk ? 'Оптимально / Вірно' : 'Потребує уваги (Оптимально: ' + q.opts[q.best] + ')'}`;
+          })
+        ];
+        files[`${folderName}/Учасники/Учасник_${String(idx + 1).padStart(2, '0')}_${cleanName}.txt`] = lines.join('\n');
+      });
+
+      return { folderName, files };
+    }
+
+    function exportWordFile() {
+      if (!state.session || state.responses.length === 0) {
+        return showToast('Немає даних для звіту Word. Пройдіть або симулюйте тест.');
+      }
+      const safeUnit = state.session.unit.replace(/[^\p{L}\p{N}_-]+/gu, '_');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const docHtml = generateWordReportHtml();
+      const blob = new Blob(['\ufeff', docHtml], { type: 'application/msword;charset=utf-8' });
+      downloadBlob(blob, `Звіт_${safeUnit}_${dateStr}.doc`);
+      showToast('Звіт у форматі Word (.doc) збережено!');
+    }
+
+    function exportExcelFile() {
+      if (!state.session || state.responses.length === 0) {
+        return showToast('Немає даних для звіту Excel. Пройдіть або симулюйте тест.');
+      }
+      const safeUnit = state.session.unit.replace(/[^\p{L}\p{N}_-]+/gu, '_');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const xlsHtml = generateExcelReportHtml();
+      const blob = new Blob(['\ufeff', xlsHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      downloadBlob(blob, `Звіт_${safeUnit}_${dateStr}.xls`);
+      showToast('Звіт у форматі Excel (.xls) збережено!');
+    }
+
+    function renderPortalView() {
+      const s = state.session;
+      const resps = state.responses;
+      const analysis = analyzeData();
+
+      document.getElementById('portal-unit-badge').textContent = s ? (s.militaryUnit ? `${s.militaryUnit} • ${s.unit}` : s.unit) : 'Підрозділ не обрано';
+      document.getElementById('portal-topic-sub').textContent = s
+        ? `${s.topicTitle} • Сесія ${s.id} • ${s.anonymity === 'anonymous' ? 'Анонімно' : 'Персоніфіковано'}`
+        : 'Створіть сесію у вкладці «Налаштування» або натисніть «Оновити з таблиці»';
+
+      document.getElementById('kpi-submitted-count').textContent = analysis.submittedCount;
+      document.getElementById('kpi-avg-score').textContent = `${analysis.avgScore}%`;
+      document.getElementById('kpi-high-risk').textContent = analysis.riskCounts.high;
+
+      const risksEl = document.getElementById('risks-list');
+      risksEl.innerHTML = analysis.risks.length
+        ? analysis.risks.map(r => {
+            const cls = r.level === 'high' ? 'bg-rose-50 border-rose-200 text-rose-950' : r.level === 'med' ? 'bg-amber-50 border-amber-200 text-amber-950' : 'bg-emerald-50 border-emerald-200 text-emerald-950';
+            return `<div class="p-3 rounded-xl border text-xs leading-relaxed space-y-1 ${cls}">
+              <div class="font-bold">${escHtml(r.title)}</div>
+              <div>${escHtml(r.text)}</div>
+              <div class="pt-1 border-t border-black/10"><b>Пропозиція вирішення:</b> ${escHtml(r.solution)}</div>
+            </div>`;
+          }).join('')
+        : '<p class="text-xs text-slate-500">Недостатньо даних.</p>';
+
+      const recEl = document.getElementById('recommendations-list');
+      recEl.innerHTML = analysis.recommendations.length
+        ? analysis.recommendations.map(rec => `<div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 leading-relaxed flex gap-2"><span class="text-emerald-700 font-bold">•</span><span>${escHtml(rec)}</span></div>`).join('')
+        : '<p class="text-xs text-slate-500">Недостатньо даних.</p>';
+
+      const tbody = document.getElementById('participants-tbody');
+      if (resps.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">Ще немає поданих тестів</td></tr>';
+      } else {
+        tbody.innerHTML = resps.map((r, i) => {
+          const rk = computeRiskLevel(r.scorePct);
+          return `
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 px-4 text-slate-500">${i + 1}</td>
+              <td class="py-3 px-4 font-semibold text-slate-900">${escHtml(r.participantLabel)}</td>
+              <td class="py-3 px-4 text-slate-600">${escHtml(r.rank)}</td>
+              <td class="py-3 px-4 font-semibold">${r.correctCount}/${r.totalCount} (${r.scorePct}%)</td>
+              <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${rk.badge}">${rk.label}</span></td>
+              <td class="py-3 px-4 text-slate-500 font-mono text-xs">${r.submittedAt}</td>
+              <td class="py-3 px-4"><span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">Готово</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      renderCharts(analysis);
+
+      const folder = buildVirtualFolder();
+      const fileKeys = Object.keys(folder.files);
+      document.getElementById('kpi-files-count').textContent = fileKeys.length;
+      document.getElementById('folder-name-label').textContent = `${folder.folderName}/`;
+
+      const listEl = document.getElementById('folder-file-list');
+      if (fileKeys.length === 0) {
+        listEl.innerHTML = '<div class="text-xs text-slate-400 p-3">Створіть сесію та отримайте відповіді</div>';
+        document.getElementById('file-preview-header').textContent = 'Оберіть файл для перегляду';
+        document.getElementById('file-preview-content').textContent = 'Вміст файлу відобразиться тут...';
+      } else {
+        const previewableKeys = fileKeys.filter(k => k.endsWith('.txt'));
+        if (!state.selectedFileKey || !folder.files[state.selectedFileKey]) {
+          state.selectedFileKey = previewableKeys[0] || fileKeys[0];
+        }
+        listEl.innerHTML = '';
+        fileKeys.forEach(key => {
+          const shortName = key.replace(folder.folderName + '/', '');
+          const active = key === state.selectedFileKey;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `w-full text-left px-3 py-2 rounded-lg text-xs font-mono truncate transition flex items-center gap-2 ${active ? 'bg-[#1e3a2f] text-white font-semibold' : 'text-slate-700 hover:bg-slate-200/70'}`;
+          btn.innerHTML = `<i data-lucide="file-text" class="w-3.5 h-3.5 shrink-0"></i><span class="truncate">${escHtml(shortName)}</span>`;
+          btn.addEventListener('click', () => {
+            state.selectedFileKey = key;
+            renderPortalView();
+          });
+          listEl.appendChild(btn);
+        });
+        document.getElementById('file-preview-header').textContent = state.selectedFileKey;
+        if (state.selectedFileKey.endsWith('.doc') || state.selectedFileKey.endsWith('.xls')) {
+          document.getElementById('file-preview-content').textContent =
+            `Файл «${state.selectedFileKey}» сформовано з повним описом проблемних питань, пропозицій вирішення, зведеними таблицями та протоколами.\nНатисніть кнопку «Звіт Word (.doc)» або «Звіт Excel (.xls)» вище, щоб відкрити його у Microsoft Word / Excel.`;
+        } else {
+          document.getElementById('file-preview-content').textContent = folder.files[state.selectedFileKey];
         }
       }
-      return jsonOut({ ok: true, responses: responses });
+      refreshIcons();
     }
 
-    return jsonOut({ ok: true, message: 'Portal API active' });
-  } catch (err) {
-    return jsonOut({ ok: false, error: String(err) });
-  }
-}
+    function renderCharts(analysis) {
+      if (typeof Chart === 'undefined') return;
 
-function doPost(e) {
-  try {
-    const raw = (e && e.postData && e.postData.contents) ? e.postData.contents : '{}';
-    const data = JSON.parse(raw);
-    const action = data.action || '';
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+      const ctxRisk = document.getElementById('chart-risk').getContext('2d');
+      if (state.charts.risk) state.charts.risk.destroy();
+      state.charts.risk = new Chart(ctxRisk, {
+        type: 'doughnut',
+        data: {
+          labels: ['Низький ризик', 'Помірний ризик', 'Високий ризик'],
+          datasets: [{
+            data: [analysis.riskCounts.low, analysis.riskCounts.med, analysis.riskCounts.high],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } }
+        }
+      });
 
-    if (action === 'createSession') {
-      const s = data.session || {};
-      const sheet = getOrCreateSheet(ss, SHEET_SESSIONS, [
-        'Session_ID', 'Created_At', 'Military_Unit', 'Unit', 'Topic', 'Questions_Count', 'Anonymity', 'Session_JSON'
-      ]);
-      sheet.appendRow([
-        s.id || '',
-        s.createdAt || new Date().toISOString(),
-        s.militaryUnit || '',
-        s.unit || '',
-        s.topicTitle || '',
-        s.qCount || 0,
-        s.anonymity || 'anonymous',
-        JSON.stringify(s)
-      ]);
-      return jsonOut({ ok: true, action: 'createSession' });
+      const ctxQ = document.getElementById('chart-questions').getContext('2d');
+      if (state.charts.questions) state.charts.questions.destroy();
+      state.charts.questions = new Chart(ctxQ, {
+        type: 'bar',
+        data: {
+          labels: analysis.qStats.map(q => `Пит. ${q.num}`),
+          datasets: [{
+            label: '% оптимальних відповідей',
+            data: analysis.qStats.map(q => q.pct),
+            backgroundColor: analysis.qStats.map(q => q.pct >= 75 ? '#10b981' : q.pct >= 55 ? '#f59e0b' : '#ef4444'),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true, max: 100 } },
+          plugins: { legend: { display: false } }
+        }
+      });
     }
 
-    if (action === 'submitResponse') {
-      const r = data.response || {};
-      const sheet = getOrCreateSheet(ss, SHEET_RESPONSES, [
-        'Session_ID', 'Response_ID', 'Server_Timestamp', 'Military_Unit', 'Unit',
-        'Participant', 'Rank', 'Correct_Count', 'Total_Count', 'Score_Pct',
-        'Answers_JSON', 'Risk_Level', 'Submitted_Time', 'Duration_Sec'
-      ]);
-      sheet.appendRow([
-        data.sessionId || '',
-        r.id || '',
-        new Date().toISOString(),
-        data.militaryUnit || '',
-        data.unit || '',
-        r.participantLabel || '',
-        r.rank || '',
-        r.correctCount || 0,
-        r.totalCount || 0,
-        r.scorePct || 0,
-        JSON.stringify(r.answers || []),
-        r.riskLevel || 'med',
-        r.submittedAt || '',
-        r.durationSec || 0
-      ]);
-      return jsonOut({ ok: true, action: 'submitResponse' });
+    document.getElementById('nav-setup').addEventListener('click', () => switchTab('setup'));
+    document.getElementById('nav-take').addEventListener('click', () => switchTab('take'));
+    document.getElementById('nav-portal').addEventListener('click', () => switchTab('portal'));
+    document.getElementById('btn-go-setup').addEventListener('click', () => switchTab('setup'));
+
+    document.getElementById('input-military-unit').addEventListener('input', (e) => {
+      state.config.militaryUnit = e.target.value.trim() || 'ВЧ А5313';
+      saveState();
+    });
+
+    document.getElementById('select-unit').addEventListener('change', (e) => {
+      state.config.unit = e.target.value;
+      saveState();
+    });
+
+    document.getElementById('btn-add-unit').addEventListener('click', () => {
+      const inp = document.getElementById('input-custom-unit');
+      const val = inp.value.trim();
+      if (!val) return showToast('Введіть назву підрозділу');
+      const sel = document.getElementById('select-unit');
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = val;
+      sel.appendChild(opt);
+      sel.value = val;
+      state.config.unit = val;
+      inp.value = '';
+      saveState();
+      showToast(`Підрозділ «${val}» додано`);
+    });
+
+    document.getElementById('range-qcount').addEventListener('input', (e) => {
+      state.config.qCount = Math.min(MAX_QUESTIONS_LIMIT, Math.max(1, Number(e.target.value)));
+      syncQuestionSlider();
+      saveState();
+    });
+
+    document.querySelectorAll('.q-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = Math.min(MAX_QUESTIONS_LIMIT, Math.max(1, Number(btn.dataset.preset) || 5));
+        state.config.qCount = val;
+        syncQuestionSlider();
+        saveState();
+      });
+    });
+
+    document.querySelectorAll('input[name="anonymity"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        state.config.anonymity = e.target.value;
+        syncAnonymityUI();
+        saveState();
+      });
+    });
+
+    document.getElementById('btn-generate-session').addEventListener('click', () => {
+      const topic = QUESTION_BANK[state.config.topicId] || QUESTION_BANK.unit_survey_v3;
+      const targetCount = Math.min(MAX_QUESTIONS_LIMIT, Math.max(1, Number(state.config.qCount) || 5));
+      const chosenQs = [];
+      for (let i = 0; i < targetCount; i++) {
+        chosenQs.push(topic.questions[i % topic.questions.length]);
+      }
+
+      const id = 'SES-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+      const base = window.location.href.split('#')[0];
+      const milUnit = document.getElementById('input-military-unit').value.trim() || 'ВЧ А5313';
+      state.config.militaryUnit = milUnit;
+
+      const link = `${base}#session=${id}&mil=${encodeURIComponent(milUnit)}&unit=${encodeURIComponent(state.config.unit)}&topic=${topic.id}&qc=${chosenQs.length}&anon=${state.config.anonymity}`;
+
+      state.session = {
+        id,
+        militaryUnit: milUnit,
+        unit: state.config.unit,
+        topicId: topic.id,
+        topicTitle: topic.title,
+        qCount: chosenQs.length,
+        anonymity: state.config.anonymity,
+        questions: chosenQs,
+        link,
+        createdAt: new Date().toISOString()
+      };
+      state.responses = [];
+      state.runner = { started: false, currentIdx: 0, answers: [], startTime: null };
+      saveState();
+      renderSessionCard();
+      document.getElementById('dispatch-log').classList.add('hidden');
+      if (getApiUrl()) {
+        apiPost({ action: 'createSession', session: state.session });
+      }
+      showToast('Посилання сформовано! Готове до відправки в підрозділ.');
+    });
+
+    document.getElementById('btn-copy-link').addEventListener('click', () => {
+      const link = document.getElementById('input-share-link').value;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(() => showToast('Посилання скопійовано!')).catch(() => fallbackCopy(link));
+      } else {
+        fallbackCopy(link);
+      }
+    });
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showToast('Посилання скопійовано!'); } catch (e) {}
+      document.body.removeChild(ta);
     }
 
-    if (action === 'syncReport') {
-      const sheet = getOrCreateSheet(ss, SHEET_REPORTS, [
-        'Updated_At', 'Session_ID', 'Military_Unit', 'Unit', 'Topic',
-        'Submitted_Count', 'Avg_Score_Pct', 'High_Risk_Count',
-        'Problematic_Questions_And_Solutions', 'Recommendations'
-      ]);
-      sheet.appendRow([
-        new Date().toISOString(),
-        data.sessionId || '',
-        data.militaryUnit || '',
-        data.unit || '',
-        data.topicTitle || '',
-        data.submittedCount || 0,
-        data.avgScore || 0,
-        data.highRiskCount || 0,
-        data.problemsText || '',
-        data.recommendationsText || ''
-      ]);
-      return jsonOut({ ok: true, action: 'syncReport' });
+    document.getElementById('btn-dispatch-unit').addEventListener('click', () => {
+      if (!state.session) return;
+      const s = state.session;
+      const msg = `Направлено в «${s.unit}»: Прохання пройти тестування за темою «${s.topicTitle}» (${s.qCount} пит., режим: ${s.anonymity === 'anonymous' ? 'анонімно' : 'персоніфіковано'}). Посилання: ${s.link}`;
+      document.getElementById('dispatch-text').textContent = msg;
+      document.getElementById('dispatch-log').classList.remove('hidden');
+      showToast('Посилання передано в підрозділ');
+    });
+
+    document.getElementById('btn-open-test-now').addEventListener('click', () => switchTab('take'));
+
+    document.getElementById('btn-start-quiz').addEventListener('click', () => {
+      const s = state.session;
+      if (s.anonymity === 'named' && !document.getElementById('resp-name').value.trim()) {
+        return showToast('Вкажіть ПІБ або позивний перед початком');
+      }
+      state.runner.started = true;
+      state.runner.currentIdx = 0;
+      state.runner.answers = new Array(s.questions.length).fill(null);
+      state.runner.startTime = Date.now();
+      document.getElementById('runner-intro').classList.add('hidden');
+      document.getElementById('runner-questions').classList.remove('hidden');
+      renderCurrentQuestion();
+    });
+
+    document.getElementById('btn-prev-q').addEventListener('click', () => {
+      if (state.runner.currentIdx > 0) {
+        state.runner.currentIdx--;
+        renderCurrentQuestion();
+      }
+    });
+
+    document.getElementById('btn-next-q').addEventListener('click', () => {
+      if (state.runner.answers[state.runner.currentIdx] === null) {
+        return showToast('Оберіть варіант відповіді');
+      }
+      state.runner.currentIdx++;
+      renderCurrentQuestion();
+    });
+
+    document.getElementById('btn-submit-quiz').addEventListener('click', submitQuizResponse);
+
+    document.getElementById('btn-retake-another').addEventListener('click', () => {
+      state.runner.started = false;
+      document.getElementById('resp-name').value = '';
+      renderRunnerView();
+    });
+
+    document.getElementById('btn-simulate-5').addEventListener('click', () => {
+      if (!state.session) return showToast('Спочатку сформуйте сесію у вкладці 1');
+      const s = state.session;
+      const sampleNames = ['Мельник І.С.', 'Ткаченко Д.А.', 'Бондар В.М.', 'Савченко Р.П.', 'Лисенко О.К.', 'Кравчук А.В.', 'Мороз С.І.'];
+      const sampleRanks = ['Солдат', 'Старший солдат', 'Молодший сержант', 'Сержант', 'Лейтенант'];
+      const addedRecords = [];
+
+      for (let k = 0; k < 5; k++) {
+        const num = state.responses.length + 1;
+        const profileRoll = Math.random();
+        const ans = s.questions.map(q => {
+          if (profileRoll < 0.55) return Math.random() < 0.85 ? q.best : 1;
+          if (profileRoll < 0.85) return Math.random() < 0.60 ? q.best : (Math.random() < 0.5 ? 1 : 2);
+          return Math.random() < 0.30 ? q.best : 2;
+        });
+        let correctCount = 0;
+        s.questions.forEach((q, i) => { if (ans[i] === q.best) correctCount++; });
+        const scorePct = Math.round((correctCount / s.questions.length) * 100);
+        const isAnon = s.anonymity === 'anonymous';
+
+        const rec = {
+          id: `RESP-${String(num).padStart(3, '0')}`,
+          participantLabel: isAnon ? `Учасник #${String(num).padStart(2, '0')} (Анонімно)` : `${sampleNames[(num - 1) % sampleNames.length]}`,
+          rank: isAnon ? 'Приховано' : sampleRanks[(num - 1) % sampleRanks.length],
+          answers: ans,
+          correctCount,
+          totalCount: s.questions.length,
+          scorePct,
+          riskLevel: computeRiskLevel(scorePct).key,
+          submittedAt: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          durationSec: 45 + Math.floor(Math.random() * 90)
+        };
+        state.responses.push(rec);
+        addedRecords.push(rec);
+      }
+      saveState();
+      document.getElementById('badge-count').textContent = state.responses.length;
+      renderPortalView();
+
+      if (getApiUrl()) {
+        Promise.all(addedRecords.map(rec => apiPost({
+          action: 'submitResponse',
+          sessionId: s.id,
+          militaryUnit: s.militaryUnit || state.config.militaryUnit || '',
+          unit: s.unit || '',
+          response: rec
+        }))).then(() => syncSummaryToGoogleSheet());
+      }
+      showToast('Додано 5 проходжень та оновлено звіти Word, Excel і таблицю');
+    });
+
+    document.getElementById('btn-clear-results').addEventListener('click', () => {
+      state.responses = [];
+      state.selectedFileKey = null;
+      saveState();
+      document.getElementById('badge-count').textContent = '0';
+      renderPortalView();
+      showToast('Результати очищено');
+    });
+
+    document.getElementById('btn-download-word').addEventListener('click', exportWordFile);
+    document.getElementById('btn-table-word').addEventListener('click', exportWordFile);
+    document.getElementById('btn-download-excel').addEventListener('click', exportExcelFile);
+    document.getElementById('btn-table-excel').addEventListener('click', exportExcelFile);
+
+    document.getElementById('btn-download-zip').addEventListener('click', () => {
+      if (!state.session || state.responses.length === 0) {
+        return showToast('Немає даних для збереження. Пройдіть або симулюйте тест.');
+      }
+      const folder = buildVirtualFolder();
+      const blob = createZipBlob(folder.files);
+      downloadBlob(blob, `${folder.folderName}.zip`);
+      showToast(`Папку «${folder.folderName}.zip» зі звітами Word та Excel збережено`);
+    });
+
+    document.getElementById('btn-open-add-q').addEventListener('click', () => {
+      const sel = document.getElementById('new-q-topic');
+      sel.innerHTML = Object.values(QUESTION_BANK).map(t => `<option value="${t.id}">${escHtml(t.title)}</option>`).join('');
+      sel.value = state.config.topicId;
+      document.getElementById('modal-add-q').classList.remove('hidden');
+    });
+
+    function closeQModal() {
+      document.getElementById('modal-add-q').classList.add('hidden');
+    }
+    document.getElementById('btn-close-modal-q').addEventListener('click', closeQModal);
+    document.getElementById('btn-cancel-q').addEventListener('click', closeQModal);
+
+    document.getElementById('btn-save-q').addEventListener('click', () => {
+      const topicId = document.getElementById('new-q-topic').value;
+      const q = document.getElementById('new-q-text').value.trim();
+      const o0 = document.getElementById('new-q-opt0').value.trim();
+      const o1 = document.getElementById('new-q-opt1').value.trim();
+      const o2 = document.getElementById('new-q-opt2').value.trim();
+      if (!q || !o0 || !o1) return showToast('Заповніть текст питання та мінімум 2 варіанти');
+      const opts = [o0, o1];
+      if (o2) opts.push(o2);
+      QUESTION_BANK[topicId].questions.push({ q, opts, best: 0 });
+      document.getElementById('new-q-text').value = '';
+      document.getElementById('new-q-opt0').value = '';
+      document.getElementById('new-q-opt1').value = '';
+      document.getElementById('new-q-opt2').value = '';
+      closeQModal();
+      syncQuestionSlider();
+      renderTopicCards();
+      refreshIcons();
+      showToast('Питання додано до банку!');
+    });
+
+    document.getElementById('input-api-url').addEventListener('input', (e) => {
+      state.config.apiUrl = e.target.value.trim();
+      saveState();
+      updateApiStatusBadge();
+    });
+
+    document.getElementById('btn-test-sync').addEventListener('click', async () => {
+      if (!getApiUrl()) return showToast('Вставте URL веб-додатку Apps Script');
+      const res = await apiGet({ action: 'getResults' });
+      if (res && res.ok) {
+        showToast(`З’єднання з Google Таблицею працює! Записів: ${(res.responses || []).length}`);
+      } else {
+        showToast('Помилка з’єднання. Перевірте URL та доступ «Все» у Apps Script');
+      }
+    });
+
+    document.getElementById('btn-sync-portal').addEventListener('click', () => syncPortalFromServer(false));
+
+    async function handleHashSession() {
+      const hash = window.location.hash || '';
+      if (!hash.includes('session=')) return;
+      state.isRespondentLink = true;
+      applyRespondentModeUI();
+
+      const params = new URLSearchParams(hash.replace(/^#/, ''));
+      const sid = params.get('session');
+      const mil = params.get('mil');
+      const unit = params.get('unit');
+      const topicId = params.get('topic');
+      const qCount = Math.min(MAX_QUESTIONS_LIMIT, Math.max(1, parseInt(params.get('qc') || '0', 10) || 5));
+      const anon = params.get('anon');
+
+      if (sid && getApiUrl()) {
+        const data = await apiGet({ action: 'getSession', id: sid });
+        if (data && data.session) {
+          state.session = data.session;
+          saveState();
+          renderSessionCard();
+          switchTab('take');
+          showToast('Сесію завантажено! Можете проходити тест.');
+          return;
+        }
+      }
+      if (sid && state.session && state.session.id === sid) {
+        switchTab('take');
+        return;
+      }
+      if (sid && topicId && QUESTION_BANK[topicId]) {
+        const topic = QUESTION_BANK[topicId];
+        const chosenQs = [];
+        for (let i = 0; i < qCount; i++) {
+          chosenQs.push(topic.questions[i % topic.questions.length]);
+        }
+        state.session = {
+          id: sid,
+          militaryUnit: mil || 'ВЧ А5313',
+          unit: unit || 'Підрозділ',
+          topicId: topic.id,
+          topicTitle: topic.title,
+          qCount: chosenQs.length,
+          anonymity: anon === 'named' ? 'named' : 'anonymous',
+          questions: chosenQs,
+          link: window.location.href,
+          createdAt: new Date().toISOString()
+        };
+        saveState();
+        renderSessionCard();
+        switchTab('take');
+        showToast('Тест відкрито за посиланням! Можете розпочинати.');
+      }
     }
 
-    return jsonOut({ ok: false, error: 'Unknown action' });
-  } catch (err) {
-    return jsonOut({ ok: false, error: String(err) });
-  }
-}
-
-function jsonOut(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+    loadState();
+    if (!QUESTION_BANK[state.config.topicId]) {
+      state.config.topicId = 'unit_survey_v3';
+    }
+    if (state.config.militaryUnit) {
+      document.getElementById('input-military-unit').value = state.config.militaryUnit;
+    }
+    if (state.config.unit) {
+      const unitSel = document.getElementById('select-unit');
+      const exists = Array.from(unitSel.options).some(o => o.value === state.config.unit);
+      if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = state.config.unit;
+        opt.textContent = state.config.unit;
+        unitSel.appendChild(opt);
+      }
+      unitSel.value = state.config.unit;
+    }
+    if (state.config.apiUrl) {
+      document.getElementById('input-api-url').value = state.config.apiUrl;
+    }
+    updateApiStatusBadge();
+    renderTopicCards();
+    syncQuestionSlider();
+    syncAnonymityUI();
+    renderSessionCard();
+    refreshIcons();
+    handleHashSession();
+  </script>
+</body>
+</html>
