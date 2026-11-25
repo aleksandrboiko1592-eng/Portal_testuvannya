@@ -6,6 +6,7 @@
   <title>Портал тестування та звітності підрозділу</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
@@ -197,57 +198,45 @@
             <label for="resp-rank" class="block text-xs font-semibold text-slate-600 mb-1">Посада / звання (необов’язково)</label>
             <select id="resp-rank" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm bg-white">
               <option value="">Оберіть звання або посаду (необов’язково)</option>
-              <optgroup label="Рядовий склад (ЗСУ / ДШВ / Морська піхота)">
-                <option value="рекрут">рекрут</option>
-                <option value="солдат">солдат</option>
-                <option value="матрос (морська піхота)">матрос (морська піхота)</option>
-                <option value="старший солдат">старший солдат</option>
-                <option value="старший матрос (морська піхота)">старший матрос (морська піхота)</option>
-              </optgroup>
-              <optgroup label="Сержантський і старшинський склад (ЗСУ / ДШВ / Морська піхота)">
-                <option value="молодший сержант">молодший сержант</option>
-                <option value="старшина 2 статті (морська піхота)">старшина 2 статті (морська піхота)</option>
-                <option value="сержант">сержант</option>
-                <option value="старшина 1 статті (морська піхота)">старшина 1 статті (морська піхота)</option>
-                <option value="старший сержант">старший сержант</option>
-                <option value="головний старшина (морська піхота)">головний старшина (морська піхота)</option>
-                <option value="головний сержант">головний сержант</option>
-                <option value="головний корабельний старшина (морська піхота)">головний корабельний старшина (морська піхота)</option>
-                <option value="штаб-сержант">штаб-сержант</option>
-                <option value="майстер-сержант">майстер-сержант</option>
-                <option value="старший майстер-сержант">старший майстер-сержант</option>
-                <option value="головний майстер-сержант">головний майстер-сержант</option>
-              </optgroup>
-              <optgroup label="Молодший офіцерський склад (ЗСУ / ДШВ / Морська піхота)">
-                <option value="молодший лейтенант">молодший лейтенант</option>
-                <option value="лейтенант">лейтенант</option>
-                <option value="старший лейтенант">старший лейтенант</option>
-                <option value="капітан">капітан</option>
-                <option value="капітан-лейтенант (морська піхота)">капітан-лейтенант (морська піхота)</option>
-              </optgroup>
-              <optgroup label="Старший офіцерський склад (ЗСУ / ДШВ / Морська піхота)">
-                <option value="майор">майор</option>
-                <option value="капітан 3 рангу (морська піхота)">капітан 3 рангу (морська піхота)</option>
-                <option value="підполковник">підполковник</option>
-                <option value="капітан 2 рангу (морська піхота)">капітан 2 рангу (морська піхота)</option>
-                <option value="полковник">полковник</option>
-                <option value="капітан 1 рангу (морська піхота)">капітан 1 рангу (морська піхота)</option>
-              </optgroup>
-              <optgroup label="Вищий офіцерський склад (ЗСУ / ДШВ / Морська піхота)">
-                <option value="бригадний генерал">бригадний генерал</option>
-                <option value="коммодор (морська піхота)">коммодор (морська піхота)</option>
-                <option value="генерал-майор">генерал-майор</option>
-                <option value="контр-адмірал (морська піхота)">контр-адмірал (морська піхота)</option>
-                <option value="генерал-лейтенант">генерал-лейтенант</option>
-                <option value="віце-адмірал (морська піхота)">віце-адмірал (морська піхота)</option>
-                <option value="генерал">генерал</option>
-                <option value="адмірал (морська піхота)">адмірал (морська піхота)</option>
-              </optgroup>
-              <optgroup label="Посади / інше">
-                <option value="інструктор / головний інструктор">інструктор / головний інструктор</option>
-                <option value="оператор / фахівець">оператор / фахівець</option>
-                <option value="інше">інше</option>
-              </optgroup>
+              <option value="рекрут">рекрут</option>
+              <option value="солдат">солдат</option>
+              <option value="матрос (морська піхота)">матрос (морська піхота)</option>
+              <option value="старший солдат">старший солдат</option>
+              <option value="старший матрос (морська піхота)">старший матрос (морська піхота)</option>
+              <option value="молодший сержант">молодший сержант</option>
+              <option value="старшина 2 статті (морська піхота)">старшина 2 статті (морська піхота)</option>
+              <option value="сержант">сержант</option>
+              <option value="старшина 1 статті (морська піхота)">старшина 1 статті (морська піхота)</option>
+              <option value="старший сержант">старший сержант</option>
+              <option value="головний старшина (морська піхота)">головний старшина (морська піхота)</option>
+              <option value="головний сержант">головний сержант</option>
+              <option value="головний корабельний старшина (морська піхота)">головний корабельний старшина (морська піхота)</option>
+              <option value="штаб-сержант">штаб-сержант</option>
+              <option value="майстер-сержант">майстер-сержант</option>
+              <option value="старший майстер-сержант">старший майстер-сержант</option>
+              <option value="головний майстер-сержант">головний майстер-сержант</option>
+              <option value="молодший лейтенант">молодший лейтенант</option>
+              <option value="лейтенант">лейтенант</option>
+              <option value="старший лейтенант">старший лейтенант</option>
+              <option value="капітан">капітан</option>
+              <option value="капітан-лейтенант (морська піхота)">капітан-лейтенант (морська піхота)</option>
+              <option value="майор">майор</option>
+              <option value="капітан 3 рангу (морська піхота)">капітан 3 рангу (морська піхота)</option>
+              <option value="підполковник">підполковник</option>
+              <option value="капітан 2 рангу (морська піхота)">капітан 2 рангу (морська піхота)</option>
+              <option value="полковник">полковник</option>
+              <option value="капітан 1 рангу (морська піхота)">капітан 1 рангу (морська піхота)</option>
+              <option value="бригадний генерал">бригадний генерал</option>
+              <option value="коммодор (морська піхота)">коммодор (морська піхота)</option>
+              <option value="генерал-майор">генерал-майор</option>
+              <option value="контр-адмірал (морська піхота)">контр-адмірал (морська піхота)</option>
+              <option value="генерал-лейтенант">генерал-лейтенант</option>
+              <option value="віце-адмірал (морська піхота)">віце-адмірал (морська піхота)</option>
+              <option value="генерал">генерал</option>
+              <option value="адмірал (морська піхота)">адмірал (морська піхота)</option>
+              <option value="інструктор / головний інструктор">інструктор / головний інструктор</option>
+              <option value="оператор / фахівець">оператор / фахівець</option>
+              <option value="інше">інше</option>
             </select>
           </div>
         </div>
@@ -299,6 +288,24 @@
 
     <!-- ВКЛАДКА 3: ПОРТАЛ І ЗВІТИ -->
     <section id="tab-portal" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white rounded-2xl border border-slate-200 px-5 py-3.5">
+        <div class="text-sm font-bold text-slate-900">Звітність та експорт даних</div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="btn-export-word" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-blue-50 text-blue-900 hover:bg-blue-100 transition cursor-pointer">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            Зберегти в Word (.doc)
+          </button>
+          <button id="btn-export-excel" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-700 text-white hover:bg-emerald-800 transition cursor-pointer">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            Зберегти в Excel (.xlsx)
+          </button>
+          <button id="btn-export-csv" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition cursor-pointer">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Експорт CSV
+          </button>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
           <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Подано тестів</div>
@@ -318,6 +325,40 @@
         </div>
       </div>
 
+      <!-- ЗАГАЛЬНІ ПОКАЗНИКИ ЗВІТУ -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <h3 class="text-base font-bold text-slate-900">Загальні показники звіту</h3>
+          <span id="summary-total-deficiencies" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+            Виявлено недоліків (1–2 бали): 0
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Розподіл оцінок у журналах</div>
+            <div id="summary-score-bands" class="space-y-1.5 text-xs text-slate-700"></div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Джерело недоліків (оцінки 1–2)</div>
+            <div id="summary-responsibility" class="space-y-1.5 text-xs text-slate-700"></div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Середній бал за підрозділами</div>
+            <div id="summary-by-subunit" class="space-y-1.5 text-xs text-slate-700 max-h-36 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100">
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            Найбільш проблемні питання (найчастіші критичні оцінки 1–2)
+          </div>
+          <div id="summary-top-issues" class="text-xs text-slate-700 space-y-1"></div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-2xl border border-slate-200 p-6">
           <h3 class="text-base font-bold text-slate-900 mb-4">Динаміка результатів</h3>
@@ -329,9 +370,6 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-3 overflow-y-auto max-h-80">
           <div class="flex items-center justify-between">
             <h3 class="text-base font-bold text-slate-900">Виявлені недоліки та рекомендації</h3>
-            <button id="btn-export-csv" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition cursor-pointer">
-              Експорт CSV
-            </button>
           </div>
           <div id="deficiencies-list" class="space-y-2.5 text-xs">
             <p class="text-slate-400">Після проходження тестів тут автоматично відобразяться виявлені недоліки (з боку військовослужбовця або командування/організації) та запропоновані рішення.</p>
@@ -402,7 +440,6 @@
     }
 
     const COMBINED_40_QUESTIONS = buildQuestions([
-      // РОЗДІЛ 1: ЗАБЕЗПЕЧЕННЯ (10)
       {
         category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
         text: 'Чи отримали ви своєчасно та в повному обсязі речове майно й сезонне екіпірування згідно з нормами забезпечення?',
@@ -463,8 +500,6 @@
         responsibility: 'soldier',
         solution: 'Розмістити в підрозділі пам’ятку з контактами фінансової, стройової та медичної служб.'
       },
-
-      // РОЗДІЛ 2: ДИСЦИПЛІНА ТА ПОРЯДОК (10)
       {
         category: '2. Дисципліна та порядок',
         text: 'Наскільки чітко у підрозділі дотримується розпорядок дня, графік чергувань та внутрішній порядок?',
@@ -525,8 +560,6 @@
         responsibility: 'command',
         solution: 'Підбити підсумки стану дисципліни на загальних зборах підрозділу та визначити першочергові кроки.'
       },
-
-      // РОЗДІЛ 3: БАЗОВА ВІЙСЬКОВА ПІДГОТОВКА / БЗВП (10)
       {
         category: '3. Базова військова підготовка (БЗВП)',
         text: 'Наскільки впевнено ви володієте своєю штатною зброєю (розбирання, чищення, усунення затримок під час стрільби)?',
@@ -587,8 +620,6 @@
         responsibility: 'command',
         solution: 'Включити елементи стрес-тренінгу та психологічної підготовки до практичних занять.'
       },
-
-      // РОЗДІЛ 4: ВИКОНАННЯ БОЙОВИХ ЗАВДАНЬ (10)
       {
         category: '4. Виконання бойових завдань',
         text: 'Наскільки чітко, своєчасно та зрозуміло командири ставлять завдання перед виходом або початком роботи?',
@@ -1184,25 +1215,111 @@
       document.getElementById('runner-done').classList.remove('hidden');
     }
 
-    function renderReports() {
-      const list = state.submissions;
-      document.getElementById('stat-total').textContent = String(list.length);
-      const avg = list.length
-        ? (list.reduce((acc, item) => acc + (Number(item.avgScore) || 0), 0) / list.length).toFixed(2)
-        : '0.00';
-      document.getElementById('stat-avg').textContent = avg;
-      const riskCount = list.filter(item => Number(item.avgScore) < 3.0).length;
-      document.getElementById('stat-risk').textContent = String(riskCount);
-      document.getElementById('stat-last-unit').textContent = list.length ? list[0].unit : '—';
+    function computeGeneralMetrics(list) {
+      const total = list.length;
+      const avgScore = total
+        ? Number((list.reduce((acc, item) => acc + (Number(item.avgScore) || 0), 0) / total).toFixed(2))
+        : 0;
+      const highCount = list.filter(item => Number(item.avgScore) >= 4.0).length;
+      const midCount = list.filter(item => Number(item.avgScore) >= 3.0 && Number(item.avgScore) < 4.0).length;
+      const lowCount = list.filter(item => Number(item.avgScore) < 3.0).length;
 
-      const defContainer = document.getElementById('deficiencies-list');
+      const pct = count => (total ? ((count / total) * 100).toFixed(1) : '0.0');
+
       const allDefs = list.flatMap(item =>
         (item.deficiencies || []).map(d => ({ ...d, unit: item.unit, respondent: item.respondent }))
       );
-      if (!allDefs.length) {
+      const soldierDefs = allDefs.filter(d => String(d.responsibility).includes('військовослужбовця')).length;
+      const commandDefs = allDefs.filter(d => !String(d.responsibility).includes('військовослужбовця')).length;
+
+      const subunitMap = new Map();
+      list.forEach(item => {
+        const key = item.unit || item.subunit || 'Не вказано';
+        const cur = subunitMap.get(key) || { count: 0, sum: 0 };
+        cur.count += 1;
+        cur.sum += Number(item.avgScore) || 0;
+        subunitMap.set(key, cur);
+      });
+      const bySubunit = Array.from(subunitMap.entries()).map(([unit, stats]) => ({
+        unit,
+        count: stats.count,
+        avg: Number((stats.sum / stats.count).toFixed(2))
+      }));
+
+      const issueMap = new Map();
+      allDefs.forEach(d => {
+        const key = d.text;
+        const cur = issueMap.get(key) || { text: d.text, count: 0, sumScore: 0, responsibility: d.responsibility };
+        cur.count += 1;
+        cur.sumScore += Number(d.score) || 1;
+        issueMap.set(key, cur);
+      });
+      const topIssues = Array.from(issueMap.values())
+        .sort((a, b) => b.count - a.count || (a.sumScore / a.count) - (b.sumScore / b.count))
+        .slice(0, 5)
+        .map(item => ({
+          ...item,
+          avgLowScore: Number((item.sumScore / item.count).toFixed(2))
+        }));
+
+      return {
+        total,
+        avgScore,
+        highCount,
+        highPct: pct(highCount),
+        midCount,
+        midPct: pct(midCount),
+        lowCount,
+        lowPct: pct(lowCount),
+        allDefs,
+        soldierDefs,
+        commandDefs,
+        bySubunit,
+        topIssues
+      };
+    }
+
+    function renderReports() {
+      const list = state.submissions;
+      const metrics = computeGeneralMetrics(list);
+
+      document.getElementById('stat-total').textContent = String(metrics.total);
+      document.getElementById('stat-avg').textContent = metrics.total ? metrics.avgScore.toFixed(2) : '0.00';
+      document.getElementById('stat-risk').textContent = String(metrics.lowCount);
+      document.getElementById('stat-last-unit').textContent = list.length ? list[0].unit : '—';
+
+      document.getElementById('summary-total-deficiencies').textContent =
+        `Виявлено недоліків (1–2 бали): ${metrics.allDefs.length}`;
+
+      document.getElementById('summary-score-bands').innerHTML = `
+        <p>Високі (4.00–5.00): <span class="font-bold text-emerald-800">${metrics.highCount} (${metrics.highPct}%)</span></p>
+        <p>Задовільні (3.00–3.99): <span class="font-bold text-slate-800">${metrics.midCount} (${metrics.midPct}%)</span></p>
+        <p>Критичні (&lt;3.00): <span class="font-bold text-amber-800">${metrics.lowCount} (${metrics.lowPct}%)</span></p>
+      `;
+
+      document.getElementById('summary-responsibility').innerHTML = `
+        <p>Командування / організація: <span class="font-bold text-slate-900">${metrics.commandDefs}</span></p>
+        <p>Військовослужбовець: <span class="font-bold text-slate-900">${metrics.soldierDefs}</span></p>
+        <p class="text-slate-500">Усього критичних відповідей: ${metrics.allDefs.length}</p>
+      `;
+
+      document.getElementById('summary-by-subunit').innerHTML = metrics.bySubunit.length
+        ? metrics.bySubunit.map(s =>
+            `<p class="flex items-center justify-between gap-2"><span class="truncate font-medium text-slate-800">${escapeHtml(s.unit)}</span><span class="font-bold text-emerald-800 whitespace-nowrap">${s.avg.toFixed(2)} (${s.count})</span></p>`
+          ).join('')
+        : `<p class="text-slate-400">Дані з’являться після проходження тестів.</p>`;
+
+      document.getElementById('summary-top-issues').innerHTML = metrics.topIssues.length
+        ? metrics.topIssues.map((iss, idx) =>
+            `<p><span class="font-bold text-slate-900">${idx + 1}. ${escapeHtml(iss.text)}</span> — <span class="font-semibold text-amber-800">${iss.count} раз(и), сер. оцінка ${iss.avgLowScore}</span> (${escapeHtml(iss.responsibility)})</p>`
+          ).join('')
+        : `<p class="text-slate-400">Критичних питань поки не зафіксовано.</p>`;
+
+      const defContainer = document.getElementById('deficiencies-list');
+      if (!metrics.allDefs.length) {
         defContainer.innerHTML = `<p class="text-slate-400">Критичних недоліків (оцінки 1–2 бали) поки не зафіксовано.</p>`;
       } else {
-        defContainer.innerHTML = allDefs.slice(0, 25).map(d => `
+        defContainer.innerHTML = metrics.allDefs.slice(0, 25).map(d => `
           <div class="p-3 rounded-xl border border-amber-200 bg-amber-50/70 space-y-1">
             <div class="flex flex-wrap items-center justify-between gap-1">
               <span class="font-bold text-amber-900">${escapeHtml(d.responsibility)}</span>
@@ -1251,6 +1368,140 @@
           scales: { y: { min: 1, max: 5 } }
         }
       });
+    }
+
+    function exportExcel() {
+      if (!state.submissions.length) {
+        alert('Немає даних для експорту.');
+        return;
+      }
+      if (typeof XLSX === 'undefined') {
+        alert('Бібліотека Excel не завантажилась. Перевірте з’єднання з інтернетом або використайте CSV/Word.');
+        return;
+      }
+
+      const metrics = computeGeneralMetrics(state.submissions);
+      const summaryRows = [
+        ['Показник', 'Значення'],
+        ['Формування / частина', state.milUnit || 'ВЧ А5313'],
+        ['Дата формування звіту', new Date().toLocaleString('uk-UA')],
+        ['Усього подано тестів', metrics.total],
+        ['Загальний середній бал (з 5)', metrics.avgScore],
+        ['Високі результати (4.00–5.00)', `${metrics.highCount} (${metrics.highPct}%)`],
+        ['Задовільні результати (3.00–3.99)', `${metrics.midCount} (${metrics.midPct}%)`],
+        ['Критичні результати (<3.00)', `${metrics.lowCount} (${metrics.lowPct}%)`],
+        ['Усього недоліків (оцінки 1–2)', metrics.allDefs.length],
+        ['Недоліки: командування / організація', metrics.commandDefs],
+        ['Недоліки: військовослужбовець', metrics.soldierDefs],
+        [],
+        ['Підрозділ', 'Кількість проходжень', 'Середній бал'],
+        ...metrics.bySubunit.map(s => [s.unit, s.count, s.avg])
+      ];
+
+      const detailRows = [
+        ['Дата', 'ВЧ / Підрозділ', 'Учасник', 'Тема', 'Середній бал', 'Відповідей', 'Всього питань', 'Виявлені недоліки'],
+        ...state.submissions.map(s => {
+          const defs = (s.deficiencies || []).map(d => `[${d.responsibility}] ${d.text} -> ${d.solution}`).join(' | ');
+          return [s.date, s.unit, s.respondent, s.topicTitle, s.avgScore, s.answeredCount, s.totalQuestions, defs];
+        })
+      ];
+
+      const wb = XLSX.utils.book_new();
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+      const wsDetails = XLSX.utils.aoa_to_sheet(detailRows);
+      XLSX.utils.book_append_sheet(wb, wsSummary, 'Загальні показники');
+      XLSX.utils.book_append_sheet(wb, wsDetails, 'Журнал проходжень');
+
+      XLSX.writeFile(wb, `zvit_pidrozdilu_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
+    function exportWord() {
+      if (!state.submissions.length) {
+        alert('Немає даних для експорту.');
+        return;
+      }
+
+      const metrics = computeGeneralMetrics(state.submissions);
+      const subunitHtml = metrics.bySubunit.map(s =>
+        `<tr><td>${escapeHtml(s.unit)}</td><td>${s.count}</td><td>${s.avg.toFixed(2)}</td></tr>`
+      ).join('');
+
+      const journalHtml = state.submissions.map(item => {
+        const defsText = (item.deficiencies || []).length
+          ? (item.deficiencies || []).map(d => `• [${d.responsibility}] ${d.text} (оцінка ${d.score}) — ${d.solution}`).join('<br/>')
+          : 'Немає';
+        return `
+          <tr>
+            <td>${escapeHtml(item.date)}</td>
+            <td>${escapeHtml(item.unit)}</td>
+            <td>${escapeHtml(item.respondent)}</td>
+            <td>${escapeHtml(item.topicTitle)}</td>
+            <td>${item.avgScore} / 5 (${item.answeredCount}/${item.totalQuestions})</td>
+            <td>${escapeHtml(defsText).replace(/&lt;br\/&gt;/g, '<br/>')}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const docHtml = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office"
+              xmlns:w="urn:schemas-microsoft-com:office:word"
+              xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="utf-8" />
+          <title>Звіт підрозділу</title>
+          <style>
+            body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #16201b; }
+            h1 { font-size: 16pt; color: #153628; margin-bottom: 4px; }
+            h2 { font-size: 13pt; color: #1f4d3a; margin-top: 18px; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+            th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
+            th { background-color: #e6eeea; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h1>Звіт про результати тестування та оцінювання стану підрозділу</h1>
+          <p><strong>Формування:</strong> ${escapeHtml(state.milUnit || 'ВЧ А5313')} &nbsp;|&nbsp; <strong>Сформовано:</strong> ${escapeHtml(new Date().toLocaleString('uk-UA'))}</p>
+
+          <h2>1. Загальні показники</h2>
+          <table>
+            <tr><th>Показник</th><th>Значення</th></tr>
+            <tr><td>Усього подано тестів</td><td>${metrics.total}</td></tr>
+            <tr><td>Загальний середній бал (з 5)</td><td>${metrics.avgScore.toFixed(2)}</td></tr>
+            <tr><td>Високі результати (4.00–5.00)</td><td>${metrics.highCount} (${metrics.highPct}%)</td></tr>
+            <tr><td>Задовільні результати (3.00–3.99)</td><td>${metrics.midCount} (${metrics.midPct}%)</td></tr>
+            <tr><td>Критичні результати (&lt;3.00)</td><td>${metrics.lowCount} (${metrics.lowPct}%)</td></tr>
+            <tr><td>Усього недоліків (оцінки 1–2)</td><td>${metrics.allDefs.length} (Командування/організація: ${metrics.commandDefs}, Військовослужбовець: ${metrics.soldierDefs})</td></tr>
+          </table>
+
+          <h2>2. Показники за підрозділами</h2>
+          <table>
+            <tr><th>Підрозділ</th><th>Пройдено тестів</th><th>Середній бал</th></tr>
+            ${subunitHtml}
+          </table>
+
+          <h2>3. Журнал проходжень та виявлені недоліки</h2>
+          <table>
+            <tr>
+              <th>Дата</th>
+              <th>ВЧ / Підрозділ</th>
+              <th>Учасник</th>
+              <th>Тема</th>
+              <th>Результат</th>
+              <th>Недоліки та вирішення</th>
+            </tr>
+            ${journalHtml}
+          </table>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob(['\ufeff', docHtml], { type: 'application/msword;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `zvit_pidrozdilu_${new Date().toISOString().slice(0, 10)}.doc`;
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     function exportCsv() {
@@ -1359,6 +1610,8 @@
       document.getElementById('sync-status').textContent = `Оновлено о ${new Date().toLocaleTimeString('uk-UA')}.`;
     });
 
+    document.getElementById('btn-export-word').addEventListener('click', exportWord);
+    document.getElementById('btn-export-excel').addEventListener('click', exportExcel);
     document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
 
     document.getElementById('btn-open-add-q').addEventListener('click', () => {
