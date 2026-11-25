@@ -191,11 +191,64 @@
         <div id="runner-respondent-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label for="resp-name" class="block text-xs font-semibold text-slate-600 mb-1">ПІБ або позивний</label>
-            <input id="resp-name" type="text" placeholder="Наприклад: Бойко О. / «Сокіл»" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm" />
+            <input id="resp-name" type="text" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm" />
           </div>
           <div>
             <label for="resp-rank" class="block text-xs font-semibold text-slate-600 mb-1">Посада / звання (необов’язково)</label>
-            <input id="resp-rank" type="text" placeholder="Наприклад: солдат / оператор" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm" />
+            <select id="resp-rank" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm bg-white">
+              <option value="">Оберіть звання або посаду (необов’язково)</option>
+              <optgroup label="Рядовий склад (ЗСУ / ДШВ / Морська піхота)">
+                <option value="рекрут">рекрут</option>
+                <option value="солдат">солдат</option>
+                <option value="матрос (морська піхота)">матрос (морська піхота)</option>
+                <option value="старший солдат">старший солдат</option>
+                <option value="старший матрос (морська піхота)">старший матрос (морська піхота)</option>
+              </optgroup>
+              <optgroup label="Сержантський і старшинський склад (ЗСУ / ДШВ / Морська піхота)">
+                <option value="молодший сержант">молодший сержант</option>
+                <option value="старшина 2 статті (морська піхота)">старшина 2 статті (морська піхота)</option>
+                <option value="сержант">сержант</option>
+                <option value="старшина 1 статті (морська піхота)">старшина 1 статті (морська піхота)</option>
+                <option value="старший сержант">старший сержант</option>
+                <option value="головний старшина (морська піхота)">головний старшина (морська піхота)</option>
+                <option value="головний сержант">головний сержант</option>
+                <option value="головний корабельний старшина (морська піхота)">головний корабельний старшина (морська піхота)</option>
+                <option value="штаб-сержант">штаб-сержант</option>
+                <option value="майстер-сержант">майстер-сержант</option>
+                <option value="старший майстер-сержант">старший майстер-сержант</option>
+                <option value="головний майстер-сержант">головний майстер-сержант</option>
+              </optgroup>
+              <optgroup label="Молодший офіцерський склад (ЗСУ / ДШВ / Морська піхота)">
+                <option value="молодший лейтенант">молодший лейтенант</option>
+                <option value="лейтенант">лейтенант</option>
+                <option value="старший лейтенант">старший лейтенант</option>
+                <option value="капітан">капітан</option>
+                <option value="капітан-лейтенант (морська піхота)">капітан-лейтенант (морська піхота)</option>
+              </optgroup>
+              <optgroup label="Старший офіцерський склад (ЗСУ / ДШВ / Морська піхота)">
+                <option value="майор">майор</option>
+                <option value="капітан 3 рангу (морська піхота)">капітан 3 рангу (морська піхота)</option>
+                <option value="підполковник">підполковник</option>
+                <option value="капітан 2 рангу (морська піхота)">капітан 2 рангу (морська піхота)</option>
+                <option value="полковник">полковник</option>
+                <option value="капітан 1 рангу (морська піхота)">капітан 1 рангу (морська піхота)</option>
+              </optgroup>
+              <optgroup label="Вищий офіцерський склад (ЗСУ / ДШВ / Морська піхота)">
+                <option value="бригадний генерал">бригадний генерал</option>
+                <option value="коммодор (морська піхота)">коммодор (морська піхота)</option>
+                <option value="генерал-майор">генерал-майор</option>
+                <option value="контр-адмірал (морська піхота)">контр-адмірал (морська піхота)</option>
+                <option value="генерал-лейтенант">генерал-лейтенант</option>
+                <option value="віце-адмірал (морська піхота)">віце-адмірал (морська піхота)</option>
+                <option value="генерал">генерал</option>
+                <option value="адмірал (морська піхота)">адмірал (морська піхота)</option>
+              </optgroup>
+              <optgroup label="Посади / інше">
+                <option value="інструктор / головний інструктор">інструктор / головний інструктор</option>
+                <option value="оператор / фахівець">оператор / фахівець</option>
+                <option value="інше">інше</option>
+              </optgroup>
+            </select>
           </div>
         </div>
 
