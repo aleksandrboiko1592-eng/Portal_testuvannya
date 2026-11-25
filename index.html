@@ -10,7 +10,7 @@
   <style>
     body {
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f4f6f5;
+      background-color: #f3f6f4;
       color: #16201b;
     }
     .nav-btn.active {
@@ -18,24 +18,24 @@
       color: #ffffff;
     }
     .nav-btn:not(.active) {
-      background-color: #e8efec;
+      background-color: #e6eeea;
       color: #1f4d3a;
     }
     .nav-btn:not(.active):hover {
-      background-color: #d7e4de;
+      background-color: #d5e2dc;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-  <header class="bg-[#163829] text-white border-b border-[#255640]">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+  <header class="bg-[#153628] text-white border-b border-[#24543f]">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-[#276349] flex items-center justify-center">
           <i data-lucide="shield-check" class="w-5 h-5 text-emerald-200"></i>
         </div>
         <div>
           <h1 class="text-lg sm:text-xl font-bold tracking-tight">Портал тестування та звітності підрозділу</h1>
-          <p class="text-xs text-emerald-200/80">Оцінка стану, підготовки та зворотного зв'язку особового складу</p>
+          <p class="text-xs text-emerald-200/80">ВЧ А5313 • Оцінювання стану, підготовки та зворотного зв’язку особового складу</p>
         </div>
       </div>
 
@@ -53,33 +53,54 @@
     </div>
   </header>
 
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
     <!-- ВКЛАДКА 1: НАЛАШТУВАННЯ -->
     <section id="tab-setup" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h2 class="text-base font-bold text-slate-900">Параметри тестування та формування посилання</h2>
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <h2 class="text-base font-bold text-slate-900">Налаштування сесії опитування та тестування</h2>
             <button id="btn-open-add-q" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition cursor-pointer">
               <i data-lucide="plus-circle" class="w-4 h-4"></i>
-              Додати питання
+              Додати власне питання
             </button>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label for="input-unit" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                Підрозділ / група
+              <label for="input-mil-unit" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                Військова частина / формування
               </label>
-              <input id="input-unit" type="text" value="81-й підрозділ" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              <input id="input-mil-unit" type="text" value="ВЧ А5313" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600" />
             </div>
 
             <div>
-              <label for="select-topic" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                Тема тестування
+              <label for="select-subunit" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                Підрозділ (зі списку або власний)
               </label>
-              <select id="select-topic" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+              <select id="select-subunit" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <option value="Відділення супроводження груп ПМП">Відділення супроводження груп ПМП</option>
+                <option value="Відділення моральної підтримки">Відділення моральної підтримки</option>
+                <option value="Відділення оперативної психологічної підтримки">Відділення оперативної психологічної підтримки</option>
+                <option value="Відділення психологічного супроводу">Відділення психологічного супроводу</option>
+                <option value="Група транспортного забезпечення">Група транспортного забезпечення</option>
+                <option value="Управління та штаб (ВЧ А5313)">Управління та штаб (ВЧ А5313)</option>
+                <option value="58 ОМПБр (ВЧ А1376)">58 ОМПБр (ВЧ А1376)</option>
+                <option value="42 ОМБр">42 ОМБр</option>
+                <option value="119 ОБр ТрО">119 ОБр ТрО</option>
+                <option value="ВЧ А5161">ВЧ А5161</option>
+                <option value="ВЧ А5143 (14 АК)">ВЧ А5143 (14 АК)</option>
+                <option value="custom">Свій підрозділ (ввести вручну)...</option>
+              </select>
+              <input id="input-custom-subunit" type="text" placeholder="Введіть назву підрозділу" class="hidden mt-2 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600" />
             </div>
+          </div>
+
+          <div>
+            <label for="select-topic" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+              Тема тестування / опитування
+            </label>
+            <select id="select-topic" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
           </div>
 
           <div>
@@ -87,9 +108,9 @@
               <label for="range-qcount" class="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Кількість питань у сесії
               </label>
-              <span id="label-qcount" class="text-sm font-bold text-emerald-800">10 питань</span>
+              <span id="label-qcount" class="text-sm font-bold text-emerald-800">40 питань</span>
             </div>
-            <input id="range-qcount" type="range" min="1" max="47" value="10" class="w-full accent-[#1f4d3a] cursor-pointer" />
+            <input id="range-qcount" type="range" min="1" max="47" value="40" class="w-full accent-[#1f4d3a] cursor-pointer" />
             <div class="flex items-center justify-between text-xs text-slate-400 mt-1">
               <span>Мін: 1</span>
               <span id="label-topic-max">Макс: 47</span>
@@ -100,7 +121,7 @@
           <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-100">
             <label class="inline-flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
               <input id="checkbox-anon" type="checkbox" class="w-4 h-4 rounded accent-[#1f4d3a]" />
-              <span>Анонімне проходження (без обов'язкового ПІБ)</span>
+              <span>Анонімне проходження (без обов’язкового ПІБ)</span>
             </label>
 
             <button id="btn-generate-session" type="button" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#1f4d3a] text-white hover:bg-[#173b2c] transition cursor-pointer">
@@ -109,10 +130,10 @@
             </button>
           </div>
 
-          <div id="session-link-box" class="hidden bg-emerald-50/80 border border-emerald-200 rounded-xl p-4 space-y-2">
+          <div id="session-link-box" class="hidden bg-emerald-50/90 border border-emerald-200 rounded-xl p-4 space-y-2">
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-bold uppercase tracking-wider text-emerald-900">
-                Коротке посилання для учасників (звіт для них приховано)
+                Посилання для особового складу (вкладка звітів прихована)
               </span>
               <span id="badge-session-code" class="text-xs font-mono bg-white px-2.5 py-1 rounded-md border border-emerald-200 text-emerald-900"></span>
             </div>
@@ -129,7 +150,7 @@
           <h2 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">Синхронізація з Google Таблицею</h2>
           <div>
             <label for="input-api-url" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-              URL веб-додатка Apps Script (/exec)
+              URL вебдодатка Apps Script (/exec)
             </label>
             <input id="input-api-url" type="url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600" />
           </div>
@@ -142,6 +163,13 @@
             </button>
           </div>
           <p id="sync-status" class="text-xs text-slate-500">Локальне сховище активне.</p>
+          <div class="pt-3 border-t border-slate-100 text-xs text-slate-500 space-y-1">
+            <p class="font-semibold text-slate-700">Структура нового блока (40 питань):</p>
+            <p>1. Забезпечення (вкл. фінансове) — 10 питань</p>
+            <p>2. Дисципліна та порядок — 10 питань</p>
+            <p>3. Базова військова підготовка (БЗВП) — 10 питань</p>
+            <p>4. Виконання бойових завдань — 10 питань</p>
+          </div>
         </div>
       </div>
     </section>
@@ -153,8 +181,8 @@
           <span class="inline-block text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900">
             Проходження опитування
           </span>
-          <h2 id="runner-title" class="text-xl font-bold text-slate-900 pt-1">Стан підрозділу</h2>
-          <p id="runner-meta" class="text-sm text-slate-500">Підрозділ: 81-й підрозділ • Питань: 10</p>
+          <h2 id="runner-title" class="text-xl font-bold text-slate-900 pt-1">Забезпечення, дисципліна, БЗВП та виконання бойових завдань</h2>
+          <p id="runner-meta" class="text-sm text-slate-500">ВЧ А5313 • Підрозділ • Питань: 40</p>
         </div>
 
         <div id="runner-respondent-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -163,8 +191,8 @@
             <input id="resp-name" type="text" placeholder="Наприклад: Бойко О. / «Сокіл»" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm" />
           </div>
           <div>
-            <label for="resp-rank" class="block text-xs font-semibold text-slate-600 mb-1">Посада / роль (необов'язково)</label>
-            <input id="resp-rank" type="text" placeholder="Наприклад: оператор / стрілець" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm" />
+            <label for="resp-rank" class="block text-xs font-semibold text-slate-600 mb-1">Посада / звання (необов’язково)</label>
+            <input id="resp-rank" type="text" placeholder="Наприклад: солдат / оператор" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm" />
           </div>
         </div>
 
@@ -174,9 +202,9 @@
       </div>
 
       <div id="runner-active" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6 max-w-3xl mx-auto space-y-6">
-        <div class="flex items-center justify-between gap-4 border-b border-slate-100 pb-3">
-          <span id="q-progress" class="text-xs font-bold uppercase tracking-wider text-emerald-800">Питання 1 з 10</span>
-          <span id="q-category" class="text-xs text-slate-400"></span>
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <span id="q-progress" class="text-xs font-bold uppercase tracking-wider text-emerald-800">Питання 1 з 40</span>
+          <span id="q-category" class="text-xs font-medium px-2.5 py-1 rounded-md bg-slate-100 text-slate-600"></span>
         </div>
 
         <div class="space-y-4">
@@ -203,11 +231,11 @@
         </div>
         <h3 class="text-xl font-bold text-slate-900">Відповіді зафіксовано</h3>
         <p class="text-sm text-slate-600">
-          Дякуємо за участь. Результати передано до звітності підрозділу. Перегляд загального звіту для учасників опитування недоступний.
+          Дякуємо за участь. Результати передано до звітності підрозділу. Перегляд зведеного звіту для учасників опитування недоступний.
         </p>
         <div class="pt-2 flex justify-center gap-3">
           <button id="btn-new-respondent" type="button" class="px-4 py-2 rounded-xl text-sm font-semibold bg-[#1f4d3a] text-white hover:bg-[#173b2c] transition cursor-pointer">
-            Пройти ще раз (новий учасник)
+            Пройти ще раз (наступний учасник)
           </button>
         </div>
       </div>
@@ -215,25 +243,43 @@
 
     <!-- ВКЛАДКА 3: ПОРТАЛ І ЗВІТИ -->
     <section id="tab-portal" class="hidden space-y-6">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
-          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Всього відповідей</div>
+          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Подано тестів</div>
           <div id="stat-total" class="text-2xl font-bold text-slate-900 mt-1">0</div>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
-          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Середній бал</div>
-          <div id="stat-avg" class="text-2xl font-bold text-emerald-800 mt-1">0.0</div>
+          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Середній бал (з 5)</div>
+          <div id="stat-avg" class="text-2xl font-bold text-emerald-800 mt-1">0.00</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-5">
+          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Потребують уваги (&lt;3.0)</div>
+          <div id="stat-risk" class="text-2xl font-bold text-amber-700 mt-1">0</div>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
           <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Останній підрозділ</div>
-          <div id="stat-last-unit" class="text-lg font-bold text-slate-900 mt-1">—</div>
+          <div id="stat-last-unit" class="text-base font-bold text-slate-900 mt-1 truncate">—</div>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl border border-slate-200 p-6">
-        <h3 class="text-base font-bold text-slate-900 mb-4">Динаміка результатів</h3>
-        <div class="h-64">
-          <canvas id="results-chart"></canvas>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6">
+          <h3 class="text-base font-bold text-slate-900 mb-4">Динаміка результатів</h3>
+          <div class="h-64">
+            <canvas id="results-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-3 overflow-y-auto max-h-80">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-900">Виявлені недоліки та рекомендації</h3>
+            <button id="btn-export-csv" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition cursor-pointer">
+              Експорт CSV
+            </button>
+          </div>
+          <div id="deficiencies-list" class="space-y-2.5 text-xs">
+            <p class="text-slate-400">Після проходження тестів тут автоматично відобразяться виявлені недоліки (з боку військовослужбовця або командування/організації) та запропоновані рішення.</p>
+          </div>
         </div>
       </div>
 
@@ -243,7 +289,7 @@
           <thead>
             <tr class="border-b border-slate-200 text-xs uppercase text-slate-400">
               <th class="py-2.5 pr-4">Дата</th>
-              <th class="py-2.5 pr-4">Підрозділ</th>
+              <th class="py-2.5 pr-4">ВЧ / Підрозділ</th>
               <th class="py-2.5 pr-4">Учасник</th>
               <th class="py-2.5 pr-4">Тема</th>
               <th class="py-2.5">Результат</th>
@@ -269,7 +315,7 @@
         <select id="new-q-topic" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white"></select>
       </div>
       <div>
-        <label for="new-q-text" class="block text-xs font-semibold text-slate-600 mb-1">Текст питання</label>
+        <label for="new-q-text" class="block text-xs font-semibold text-slate-600 mb-1">Текст питання українською мовою</label>
         <textarea id="new-q-text" rows="3" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></textarea>
       </div>
       <button id="btn-save-new-q" type="button" class="w-full py-2.5 rounded-xl text-sm font-semibold bg-[#1f4d3a] text-white hover:bg-[#173b2c] transition cursor-pointer">
@@ -279,7 +325,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'unit_test_portal_v4';
+    const STORAGE_KEY = 'unit_test_portal_v5_full';
     const DEFAULT_SCALE_OPTIONS = [
       { label: 'Повністю погоджуюсь / Відмінно', score: 5 },
       { label: 'Скоріше так / Добре', score: 4 },
@@ -288,98 +334,481 @@
       { label: 'Категорично ні / Критично', score: 1 }
     ];
 
-    const UNIT_STATE_47_QUESTIONS = [
-      'Наскільки чітко та зрозуміло пройшов ваш етап призову й первинного оформлення документів?',
-      'Чи достатньо повно вас поінформували про права, обов’язки та соціальні гарантії під час зарахування?',
-      'Як ви оцінюєте первинну адаптацію до умов служби у підрозділі в перші тижні?',
-      'Чи отримали ви своєчасно та в повному обсязі базове речове майно й екіпірування?',
-      'Наскільки зручною та придатною для виконання завдань є видана форма й взуття?',
-      'Чи вистачає у підрозділі засобів індивідуального захисту та спецспорядження за вашою посадою?',
-      'Як ви оцінюєте якість та регулярність харчування особового складу?',
-      'Чи відповідає санітарно-побутовий стан місць розміщення та відпочинку базовим потребам?',
-      'Наскільки доступною та своєчасною є медична допомога і стоматологічний супровід у підрозділі?',
-      'Чи вистачає у підрозділі базових аптечок та засобів першої домедичної допомоги?',
-      'Як ви оцінюєте практичну користь проведених занять з тактичної медицини?',
-      'Наскільки зрозуміло поставлені бойові та повсякденні завдання перед вашою групою?',
-      'Чи відповідає фактична підготовка особового складу складності покладених завдань?',
-      'Як ви оцінюєте рівень злагодженості дій всередині вашого відділення / екіпажу / розрахунку?',
-      'Наскільки ефективно налагоджена взаємодія між сусідніми групами та елементами підрозділу?',
-      'Чи достатньо часу приділяється практичним тренуванням порівняно з теоретичними інструктажами?',
-      'Наскільки своєчасно до особового складу доводяться зміни обстановки та правил безпеки?',
-      'Як ви оцінюєте стан дотримання заходів безпеки під час занять, переміщень і чергувань?',
-      'Чи вистачає необхідного обладнання, інструментів та технічних засобів для роботи за спеціальністю?',
-      'Як ви оцінюєте своєчасність ремонту та обслуговування техніки й майна у підрозділі?',
-      'Наскільки прозоро та справедливо розподіляється навантаження між військовослужбовцями?',
-      'Чи відчуваєте ви згуртованість і взаємопідтримку всередині свого колективу?',
-      'Як ви оцінюєте морально-психологічний клімат у підрозділі на поточний момент?',
-      'Наскільки часто ви відчуваєте емоційне виснаження або накопичену втому від служби?',
-      'Чи вистачає часу на повноцінний сон і відновлення між змінами або завданнями?',
-      'Як ви оцінюєте рівень дисципліни та дотримання статутних норм у підрозділі?',
-      'Чи є у підрозділі випадки порушень дисципліни, які заважають спільній роботі?',
-      'Наскільки конструктивно керівництво реагує на проблемні питання та пропозиції особового складу?',
-      'Чи можете ви відкрито звернутися до безпосереднього командира у разі виникнення складної ситуації?',
-      'Як ви оцінюєте авторитет і компетентність безпосередніх командирів у підрозділі?',
-      'Наскільки справедливим є заохочення та оцінка реального внеску кожного бійця?',
-      'Чи зрозумілі критерії переведення, підвищення або направлення на навчання / курси?',
-      'Як ви оцінюєте рівень інформування особового складу про справи та перспективи підрозділу?',
-      'Чи своєчасно вирішуються питання грошового забезпечення та додаткових виплат?',
-      'Наскільки оперативно допомагають у вирішенні питань зі статусом УБД, довідками та документами?',
-      'Чи вистачає підтримки та уваги до сімейних і побутових проблем військовослужбовців?',
-      'Як ви оцінюєте порядок надання відпусток та відновлення після тривалого виконання завдань?',
-      'Наскільки достатньою є психологічна підтримка та можливість розвантаження після напружених етапів?',
-      'Чи допомагають колективні заходи або неформальне спілкування знімати напругу в підрозділі?',
-      'Наскільки чітко розподілені ролі та зони відповідальності під час виконання завдань?',
-      'Чи вистачає зв’язку та інформаційної координації під час роботи на позиціях або виїздах?',
-      'Як ви оцінюєте готовність підрозділу до швидкого реагування на зміну завдань?',
-      'Чи відповідає ваша поточна посада вашим навичкам, здоров’ю та підготовці?',
-      'Наскільки ви впевнені у своїх діях і діях товаришів по службі під час виконання завдань?',
-      'Чи є у вас довіра до планування операцій і завдань з боку командування?',
-      'Як ви оцінюєте загальний рівень мотивації особового складу підрозділу сьогодні?',
-      'Якою є ваша загальна оцінка поточного стану підрозділу за всіма ключовими напрямами?'
-    ];
+    function buildQuestions(items) {
+      return items.map((item, idx) => ({
+        id: item.id || `q-${idx + 1}-${Math.random().toString(36).slice(2, 6)}`,
+        category: item.category,
+        text: item.text,
+        responsibility: item.responsibility || 'command',
+        solution: item.solution || 'Провести розбір на нараді підрозділу та усунути виявлені вузькі місця.',
+        options: DEFAULT_SCALE_OPTIONS
+      }));
+    }
+
+    // 1. НОВИЙ ОБ'ЄДНАНИЙ БЛОК НА 40 ПИТАНЬ:
+    // 1) Забезпечення (вкл. фінансове) — 10
+    // 2) Дисципліна та порядок — 10
+    // 3) Базова військова підготовка (БЗВП) — 10
+    // 4) Виконання бойових завдань — 10
+    const COMBINED_40_QUESTIONS = buildQuestions([
+      // РОЗДІЛ 1: ЗАБЕЗПЕЧЕННЯ (10)
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Чи отримали ви своєчасно та в повному обсязі речове майно й сезонне екіпірування згідно з нормами забезпечення?',
+        responsibility: 'command',
+        solution: 'Звірити картки речового забезпечення та подати заявку до служби тилу на доукомплектування.'
+      },
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Чи підтримуєте ви особисто видане спорядження, засоби індивідуального захисту та форму у справному й доглянутому стані?',
+        responsibility: 'soldier',
+        solution: 'Провести огляд індивідуального спорядження та організувати дрібний ремонт/заміну зношених елементів.'
+      },
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Наскільки повно укомплектована ваша індивідуальна аптечка засобами першої домедичної допомоги та якісними турнікетами?',
+        responsibility: 'command',
+        solution: 'Провести перевірку аптечок підрозділу медиком та доукомплектувати відсутні засоби.'
+      },
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Як ви оцінюєте якість, калорійність та регулярність забезпечення гарячим харчуванням і питною водою?',
+        responsibility: 'command',
+        solution: 'Перевірити графік підвозу води й харчування та посилити контроль якості на пункті харчування.'
+      },
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Чи відповідають санітарно-побутові умови місць проживання, обігріву та гігієни потребам особового складу?',
+        responsibility: 'command',
+        solution: 'Облаштувати місця просушування одягу, обігріву та санітарно-гігієнічного обслуговування.'
+      },
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Чи дотримуєтесь ви особисто правил ощадливого використання витратних матеріалів, пального, засобів зв’язку та майна підрозділу?',
+        responsibility: 'soldier',
+        solution: 'Провести інструктаж щодо бережливого ставлення та обліку закріпленого військового майна.'
+      },
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Чи вистачає підрозділу справного транспорту, засобів живлення та технічного забезпечення для повсякденної роботи?',
+        responsibility: 'command',
+        solution: 'Подати заявку на ремонт техніки та поповнення резерву акумуляторів і генераторів.'
+      },
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Чи вчасно та в повному обсязі вам виплачується основне щомісячне грошове забезпечення?',
+        responsibility: 'command',
+        solution: 'Звірити дані з фінансовою службою частини та перевірити правильність нарахувань за посадою.'
+      },
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Наскільки прозоро та своєчасно нараховуються додаткові винагороди, бойові виплати й компенсації за виконання завдань?',
+        responsibility: 'command',
+        solution: 'Довести особовому складу порядок підтвердження участі в завданнях та звірити накази на виплату.'
+      },
+      {
+        category: '1. Забезпечення (речове, побутове, медичне, фінансове)',
+        text: 'Чи знаєте ви, куди й у якому порядку звернутися в частині у разі затримки виплат, втрати документів або оформлення довідок?',
+        responsibility: 'soldier',
+        solution: 'Розмістити в підрозділі пам’ятку з контактами фінансової, стройової та медичної служб.'
+      },
+
+      // РОЗДІЛ 2: ДИСЦИПЛІНА ТА ПОРЯДОК (10)
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Наскільки чітко у підрозділі дотримується розпорядок дня, графік чергувань та внутрішній порядок?',
+        responsibility: 'command',
+        solution: 'Впорядкувати графіки нарядів і чергувань та посилити контроль командирів відділень.'
+      },
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Чи завжди ви особисто дотримуєтесь вимог статутів, субординації та наказів безпосередніх командирів?',
+        responsibility: 'soldier',
+        solution: 'Провести індивідуальну бесіду щодо виконавської дисципліни та статутного порядку.'
+      },
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Чи відсутні у підрозділі випадки вживання алкоголю або інших заборонених речовин під час служби?',
+        responsibility: 'soldier',
+        solution: 'Посилити профілактичну роботу, контроль у вечірній час та невідворотність дисциплінарної відповідальності.'
+      },
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Наскільки сумлінно ви дотримуєтесь заходів безпеки зі зброєю, боєприпасами та під час руху транспорту?',
+        responsibility: 'soldier',
+        solution: 'Провести додатковий практичний залік із заходів безпеки при поводженні зі зброєю та технікою.'
+      },
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Чи дотримується особовий склад правил інформаційної безпеки (заборона геолокації, фото позицій, відкритих обговорень)?',
+        responsibility: 'soldier',
+        solution: 'Провести інструктаж із кібергігієни та правил користування мобільними пристроями в районі виконання завдань.'
+      },
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Наскільки рівномірно та справедливо командири розподіляють навантаження, наряди й господарські роботи між військовослужбовцями?',
+        responsibility: 'command',
+        solution: 'Переглянути журнал розподілу нарядів і завдань для забезпечення рівномірного навантаження.'
+      },
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Чи своєчасно керівництво реагує на конфліктні ситуації та прояви неповаги між військовослужбовцями?',
+        responsibility: 'command',
+        solution: 'Залучити офіцера психологічної підтримки для медіації конфліктів у колективі.'
+      },
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Чи працює у підрозділі зрозумілий і швидкий порядок подання рапортів та розгляду звернень особового складу?',
+        responsibility: 'command',
+        solution: 'Налагодити реєстрацію та контроль строків розгляду рапортів через діловодство підрозділу.'
+      },
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Чи вчасно ви інформуєте безпосереднього командира про погіршення самопочуття, сімейні обставини або проблемні питання?',
+        responsibility: 'soldier',
+        solution: 'Підтримувати регулярний зворотний зв’язок між командирами відділень і особовим складом.'
+      },
+      {
+        category: '2. Дисципліна та порядок',
+        text: 'Як ви оцінюєте загальний рівень військової дисципліни та взаємної відповідальності у вашому колективі?',
+        responsibility: 'command',
+        solution: 'Підбити підсумки стану дисципліни на загальних зборах підрозділу та визначити першочергові кроки.'
+      },
+
+      // РОЗДІЛ 3: БАЗОВА ВІЙСЬКОВА ПІДГОТОВКА / БЗВП (10)
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Наскільки впевнено ви володієте своєю штатною зброєю (розбирання, чищення, усунення затримок під час стрільби)?',
+        responsibility: 'soldier',
+        solution: 'Організувати додаткові тренування зі штатною зброєю та відпрацювання нормативів.'
+      },
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Чи достатньо у підрозділі практичних стрільб і занять для підтримки та вдосконалення вогневої підготовки?',
+        responsibility: 'command',
+        solution: 'Запланувати регулярні виїзди на полігон/стрільбище відповідно до плану бойової підготовки.'
+      },
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Чи зможете ви швидко та правильно накласти турнікет і надати домедичну допомогу за алгоритмом MARCH під тиском часу?',
+        responsibility: 'soldier',
+        solution: 'Провести практичні тренування з тактичної медицини в умовах, наближених до бойових.'
+      },
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Як ви оцінюєте якість проведених у підрозділі занять із тактичної медицини та евакуації поранених?',
+        responsibility: 'command',
+        solution: 'Залучити досвідчених бойових медиків для відпрацювання практичних сценаріїв евакуації.'
+      },
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Чи володієте ви базовими навичками орієнтування на місцевості (робота з картою, компасом, офлайн-навігацією)?',
+        responsibility: 'soldier',
+        solution: 'Провести практичне заняття з військової топографії та орієнтування без стійкого сигналу GPS.'
+      },
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Наскільки добре ви знаєте правила інженерної безпеки, мінної небезпеки та дії при виявленні вибухонебезпечних предметів?',
+        responsibility: 'soldier',
+        solution: 'Провести інструктаж із мінної безпеки з демонстрацією типових загроз на напрямку.'
+      },
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Чи вмієте ви впевнено користуватися штатними засобами зв’язку, дотримуватися радіодисципліни та правил шифрованого обміну?',
+        responsibility: 'soldier',
+        solution: 'Організувати тренування зі зв’язку та налаштування радіостанцій у складі груп.'
+      },
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Чи відповідає програма занять у підрозділі реальним потребам вашої військово-облікової спеціальності?',
+        responsibility: 'command',
+        solution: 'Адаптувати розклад занять під актуальні завдання підрозділу та спеціалізацію особового складу.'
+      },
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Чи приділяєте ви особисто час самопідготовці та повторенню алгоритмів дій у позанавчальний час?',
+        responsibility: 'soldier',
+        solution: 'Забезпечити особовий склад стислими методичними пам’ятками для самопідготовки.'
+      },
+      {
+        category: '3. Базова військова підготовка (БЗВП)',
+        text: 'Наскільки психологічно стійким і підготовленим до дій у нестандартній або стресовій обстановці ви себе почуваєте?',
+        responsibility: 'command',
+        solution: 'Включити елементи стрес-тренінгу та психологічної підготовки до практичних занять.'
+      },
+
+      // РОЗДІЛ 4: ВИКОНАННЯ БОЙОВИХ ЗАВДАНЬ (10)
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Наскільки чітко, своєчасно та зрозуміло командири ставлять завдання перед виходом або початком роботи?',
+        responsibility: 'command',
+        solution: 'Впровадити чіткий алгоритм постановки бойового завдання з перевіркою розуміння кожним виконавцем.'
+      },
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Чи забезпечена ваша група необхідними засобами зв’язку, розвідки, спостереження та вогневої підтримки під конкретне завдання?',
+        responsibility: 'command',
+        solution: 'Проводити обов’язковий передвиїзний контроль оснащення та взаємодії з підрозділами підтримки.'
+      },
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Як ви оцінюєте злагодженість дій і взаємовиручку всередині вашого відділення / екіпажу під час виконання завдань?',
+        responsibility: 'soldier',
+        solution: 'Провести спільне злагодження малих груп перед ротацією або виходом на завдання.'
+      },
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Наскільки ефективно налагоджена координація між сусідніми групами та пунктом управління під час виконання завдань?',
+        responsibility: 'command',
+        solution: 'Уточнити сигнали управління, резервні канали зв’язку та порядок взаємодії між групами.'
+      },
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Чи достатньо уваги приділяється оцінці ризиків, маскуванню та захисту особового складу під час переміщень і на позиціях?',
+        responsibility: 'command',
+        solution: 'Посилити контроль за дотриманням заходів маскування, протидії БПЛА та інженерного обладнання позицій.'
+      },
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Чи дієте ви суворо за визначеним замислом і маршрутом без необґрунтованого ризику під час виконання завдання?',
+        responsibility: 'soldier',
+        solution: 'Закріпити дисципліну виконання маршрутів і сигналів управління на інструктажах.'
+      },
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Наскільки своєчасно та організовано проводяться ротації та зміна особового складу на позиціях / чергуваннях?',
+        responsibility: 'command',
+        solution: 'Оптимізувати графік ротацій і заздалегідь готувати резерв для своєчасної зміни.'
+      },
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Чи проводиться після повернення із завдання конструктивний розбір дій (AAR) з урахуванням зауважень особового складу?',
+        responsibility: 'command',
+        solution: 'Запровадити короткий післяопераційний розбір (AAR) після кожного виходу групи.'
+      },
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Чи вистачає часу та умов для повноцінного сну, відновлення сил і психологічного розвантаження після виконання завдань?',
+        responsibility: 'command',
+        solution: 'Забезпечити режим відпочинку та роботу пункту психологічної підтримки після виходу.'
+      },
+      {
+        category: '4. Виконання бойових завдань',
+        text: 'Наскільки ви впевнені в готовності свого підрозділу успішно виконати поставлені бойові завдання?',
+        responsibility: 'command',
+        solution: 'Узагальнити результати опитування та зосередити ресурси на найбільш проблемних показниках.'
+      }
+    ]);
+
+    // 2. СТАН ПІДРОЗДІЛУ — 47 ПИТАНЬ (БЕЗ ЗМІН)
+    const UNIT_STATE_47 = buildQuestions([
+      { category: 'Призов та оформлення', text: 'Наскільки чітко та зрозуміло пройшов ваш етап призову й первинного оформлення документів?' },
+      { category: 'Призов та оформлення', text: 'Чи достатньо повно вас поінформували про права, обов’язки та соціальні гарантії під час зарахування?' },
+      { category: 'Адаптація', text: 'Як ви оцінюєте первинну адаптацію до умов служби у підрозділі в перші тижні?' },
+      { category: 'Речове забезпечення', text: 'Чи отримали ви своєчасно та в повному обсязі базове речове майно й екіпірування?' },
+      { category: 'Речове забезпечення', text: 'Наскільки зручною та придатною для виконання завдань є видана форма й взуття?' },
+      { category: 'Речове забезпечення', text: 'Чи вистачає у підрозділі засобів індивідуального захисту та спецспорядження за вашою посадою?' },
+      { category: 'Харчування та побут', text: 'Як ви оцінюєте якість та регулярність харчування особового складу?' },
+      { category: 'Харчування та побут', text: 'Чи відповідає санітарно-побутовий стан місць розміщення та відпочинку базовим потребам?' },
+      { category: 'Медицина', text: 'Наскільки доступною та своєчасною є медична допомога і стоматологічний супровід у підрозділі?' },
+      { category: 'Медицина', text: 'Чи вистачає у підрозділі базових аптечок та засобів першої домедичної допомоги?' },
+      { category: 'Тактична медицина', text: 'Як ви оцінюєте практичну користь проведених занять із тактичної медицини?' },
+      { category: 'Завдання та підготовка', text: 'Наскільки зрозуміло поставлені бойові та повсякденні завдання перед вашою групою?' },
+      { category: 'Завдання та підготовка', text: 'Чи відповідає фактична підготовка особового складу складності покладених завдань?' },
+      { category: 'Злагодженість', text: 'Як ви оцінюєте рівень злагодженості дій всередині вашого відділення / екіпажу / розрахунку?' },
+      { category: 'Взаємодія', text: 'Наскільки ефективно налагоджена взаємодія між сусідніми групами та елементами підрозділу?' },
+      { category: 'Навчання', text: 'Чи достатньо часу приділяється практичним тренуванням порівняно з теоретичними інструктажами?' },
+      { category: 'Інформування', text: 'Наскільки своєчасно до особового складу доводяться зміни обстановки та правил безпеки?' },
+      { category: 'Безпека', text: 'Як ви оцінюєте стан дотримання заходів безпеки під час занять, переміщень і чергувань?' },
+      { category: 'Технічне забезпечення', text: 'Чи вистачає необхідного обладнання, інструментів та технічних засобів для роботи за спеціальністю?' },
+      { category: 'Технічне забезпечення', text: 'Як ви оцінюєте своєчасність ремонту та обслуговування техніки й майна у підрозділі?' },
+      { category: 'Навантаження', text: 'Наскільки прозоро та справедливо розподіляється навантаження між військовослужбовцями?' },
+      { category: 'Колектив', text: 'Чи відчуваєте ви згуртованість і взаємопідтримку всередині свого колективу?' },
+      { category: 'МПК', text: 'Як ви оцінюєте морально-психологічний клімат у підрозділі на поточний момент?' },
+      { category: 'Психоемоційний стан', text: 'Наскільки стабільним є ваш емоційний стан без ознак критичної втоми та виснаження?' },
+      { category: 'Відновлення', text: 'Чи вистачає часу на повноцінний сон і відновлення між змінами або завданнями?' },
+      { category: 'Дисципліна', text: 'Як ви оцінюєте рівень дисципліни та дотримання статутних норм у підрозділі?' },
+      { category: 'Дисципліна', text: 'Чи вдається підрозділу ефективно запобігати порушенням дисципліни, які заважають спільній роботі?' },
+      { category: 'Командування', text: 'Наскільки конструктивно керівництво реагує на проблемні питання та пропозиції особового складу?' },
+      { category: 'Командування', text: 'Чи можете ви відкрито звернутися до безпосереднього командира у разі виникнення складної ситуації?' },
+      { category: 'Командування', text: 'Як ви оцінюєте авторитет і компетентність безпосередніх командирів у підрозділі?' },
+      { category: 'Мотивація та оцінка', text: 'Наскільки справедливим є заохочення та оцінка реального внеску кожного бійця?' },
+      { category: 'Розвиток', text: 'Чи зрозумілі критерії переведення, підвищення або направлення на навчання / курси?' },
+      { category: 'Інформування', text: 'Як ви оцінюєте рівень інформування особового складу про справи та перспективи підрозділу?' },
+      { category: 'Фінанси', text: 'Чи своєчасно вирішуються питання грошового забезпечення та додаткових виплат?' },
+      { category: 'Документи', text: 'Наскільки оперативно допомагають у вирішенні питань зі статусом УБД, довідками та документами?' },
+      { category: 'Соціальна підтримка', text: 'Чи вистачає підтримки та уваги до сімейних і побутових проблем військовослужбовців?' },
+      { category: 'Відпустки', text: 'Як ви оцінюєте порядок надання відпусток та відновлення після тривалого виконання завдань?' },
+      { category: 'Психологічна підтримка', text: 'Наскільки достатньою є психологічна підтримка та можливість розвантаження після напружених етапів?' },
+      { category: 'Психологічна підтримка', text: 'Чи допомагають колективні заходи або неформальне спілкування знімати напругу в підрозділі?' },
+      { category: 'Організація', text: 'Наскільки чітко розподілені ролі та зони відповідальності під час виконання завдань?' },
+      { category: 'Зв’язок', text: 'Чи вистачає зв’язку та інформаційної координації під час роботи на позиціях або виїздах?' },
+      { category: 'Готовність', text: 'Як ви оцінюєте готовність підрозділу до швидкого реагування на зміну завдань?' },
+      { category: 'Посада', text: 'Чи відповідає ваша поточна посада вашим навичкам, здоров’ю та підготовці?' },
+      { category: 'Впевненість', text: 'Наскільки ви впевнені у своїх діях і діях товаришів по службі під час виконання завдань?' },
+      { category: 'Довіра', text: 'Чи є у вас довіра до планування операцій і завдань з боку командування?' },
+      { category: 'Мотивація', text: 'Як ви оцінюєте загальний рівень мотивації особового складу підрозділу сьогодні?' },
+      { category: 'Загальна оцінка', text: 'Якою є ваша загальна оцінка поточного стану підрозділу за всіма ключовими напрямами?' }
+    ]);
+
+    // 3. ТРИ КОРОТКІ ТЕМИ ПО 20 ПИТАНЬ
+    const STRESS_SLEEP_20 = buildQuestions([
+      { category: 'Стрес, сон та відновлення', text: 'Наскільки якісним і глибоким є ваш сон протягом останнього тижня?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи вдається вам швидко заснути після завершення чергування або завдання?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи відчуваєте ви відновлення сил після нічного відпочинку?' },
+      { category: 'Стрес, сон та відновлення', text: 'Наскільки спокійно ви реагуєте на побутові дрібниці без спалахів роздратування?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи вдається вам зберігати концентрацію уваги під час виконання повсякденних завдань?' },
+      { category: 'Стрес, сон та відновлення', text: 'Наскільки стабільним є ваш апетит і режим харчування останнім часом?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи вдається вам перемикатися з робочого напруження на спокійний відпочинок у вільний час?' },
+      { category: 'Стрес, сон та відновлення', text: 'Як ви оцінюєте свій рівень фізичної витривалості наприкінці робочого дня?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи відсутні у вас часті головні болі або відчуття постійної м’язової напруги?' },
+      { category: 'Стрес, сон та відновлення', text: 'Наскільки врівноваженим залишається ваш настрій протягом доби?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи вистачає вам особистого часу для зв’язку з рідними та близькими?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи володієте ви простими прийомами саморегуляції та зняття гострого стресу?' },
+      { category: 'Стрес, сон та відновлення', text: 'Наскільки легко ви приймаєте зважені рішення в умовах обмеженого часу?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи зберігаєте ви інтерес до спілкування з товаришами по службі?' },
+      { category: 'Стрес, сон та відновлення', text: 'Наскільки рідко у вас виникає відчуття тривоги без очевидної причини?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи достатньо облаштовані умови для тихого й безпечного сну в підрозділі?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи звертаєтесь ви по пораду до медика або психолога у разі тривалого безсоння чи перевтоми?' },
+      { category: 'Стрес, сон та відновлення', text: 'Наскільки рівномірно чергуються періоди інтенсивних навантажень і перепочинку?' },
+      { category: 'Стрес, сон та відновлення', text: 'Чи відчуваєте ви внутрішній ресурс для подальшого виконання службових завдань?' },
+      { category: 'Стрес, сон та відновлення', text: 'Як ви загалом оцінюєте свій поточний психофізіологічний стан?' }
+    ]);
+
+    const ADAPTATION_20 = buildQuestions([
+      { category: 'Адаптація новоприбулих', text: 'Наскільки доброзичливо та організовано вас зустріли у підрозділі в перший день прибуття?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи провели з вами вступний інструктаж щодо правил служби, безпеки та розпорядку?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи знаєте ви в обличчя та за посадами своїх безпосередніх командирів і керівництво підрозділу?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи закріплений за вами досвідчений наставник або старший товариш для швидкого входження в стрій?' },
+      { category: 'Адаптація новоприбулих', text: 'Наскільки зрозумілими є ваші функціональні обов’язки на займаній посаді?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи вчасно вас забезпечили спальним місцем, базовим майном та засобами захисту?' },
+      { category: 'Адаптація новоприбулих', text: 'Наскільки швидко ви знайшли спільну мову з військовослужбовцями свого відділення?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи отримали ви вичерпні роз’яснення щодо порядку виплат, відпусток та оформлення документів?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи враховувався ваш попередній цивільний або військовий досвід під час розподілу обов’язків?' },
+      { category: 'Адаптація новоприбулих', text: 'Наскільки доступною мовою пояснюються вимоги та завдання на перших заняттях?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи відчуваєте ви підтримку з боку колективу під час опанування нових навичок?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи відсутній у підрозділі упереджений поділ на «старожилів» і «новоприбулих»?' },
+      { category: 'Адаптація новоприбулих', text: 'Наскільки комфортно ви почуваєтесь під час спільних тренувань та чергувань?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи знаєте ви порядок дій у разі повітряної тривоги, обстрілу або зміни обстановки?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи мали ви можливість поспілкуватися з офіцером психологічної підтримки персоналу?' },
+      { category: 'Адаптація новоприбулих', text: 'Наскільки швидко вирішилися ваші першочергові побутові та організаційні питання?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи відчуваєте ви поступове зростання впевненості у своїх діях з кожним тижнем служби?' },
+      { category: 'Адаптація новоприбулих', text: 'Наскільки сприятливою є атмосфера в підрозділі для становлення нового військовослужбовця?' },
+      { category: 'Адаптація новоприбулих', text: 'Чи знаєте ви, до кого звернутися у разі виникнення особистих або сімейних труднощів?' },
+      { category: 'Адаптація новоприбулих', text: 'Як ви оцінюєте успішність власної адаптації у підрозділі на сьогодні?' }
+    ]);
+
+    const COHESION_MPK_20 = buildQuestions([
+      { category: 'Згуртованість та МПК', text: 'Наскільки високим є рівень взаємодопомоги та підтримки між бійцями вашого відділення?' },
+      { category: 'Згуртованість та МПК', text: 'Чи можете ви повністю покластися на товаришів по службі у складній або небезпечній ситуації?' },
+      { category: 'Згуртованість та МПК', text: 'Наскільки поважним і коректним є щоденне спілкування між військовослужбовцями підрозділу?' },
+      { category: 'Згуртованість та МПК', text: 'Чи вдається колективу швидко знаходити спільне рішення без затяжних суперечок?' },
+      { category: 'Згуртованість та МПК', text: 'Наскільки відкрито в підрозділі обговорюються робочі помилки з метою їх виправлення?' },
+      { category: 'Згуртованість та МПК', text: 'Чи відчуваєте ви себе повноправною та потрібною частиною єдиної команди?' },
+      { category: 'Згуртованість та МПК', text: 'Наскільки дружно особовий склад береться за спільні господарські та підготовчі роботи?' },
+      { category: 'Згуртованість та МПК', text: 'Чи відсутні у підрозділі замкнені групи, які протиставляють себе решті колективу?' },
+      { category: 'Згуртованість та МПК', text: 'Наскільки підтримують у колективі тих, кому тимчасово важче фізично або емоційно?' },
+      { category: 'Згуртованість та МПК', text: 'Чи поважають у підрозділі внесок кожного фахівця незалежно від посади?' },
+      { category: 'Згуртованість та МПК', text: 'Наскільки конструктивною є взаємодія між сержантським складом і рядовими бійцями?' },
+      { category: 'Згуртованість та МПК', text: 'Чи сприяє стиль керівництва командира згуртуванню колективу, а не роз’єднанню?' },
+      { category: 'Згуртованість та МПК', text: 'Наскільки комфортно вам працювати в одній зміні або розрахунку з більшістю колег?' },
+      { category: 'Згуртованість та МПК', text: 'Чи припиняються в колективі спроби приниження, грубості або нездорового тиску?' },
+      { category: 'Згуртованість та МПК', text: 'Наскільки охоче бійці діляться між собою практичним досвідом і корисними навичками?' },
+      { category: 'Згуртованість та МПК', text: 'Чи відчувається спільна гордість за результати роботи свого підрозділу?' },
+      { category: 'Згуртованість та МПК', text: 'Наскільки швидко згасають дрібні непорозуміння після напруженого дня?' },
+      { category: 'Згуртованість та МПК', text: 'Чи дотримується колектив негласного правила «своїх не залишаємо і не підводимо»?' },
+      { category: 'Згуртованість та МПК', text: 'Наскільки сприятливим є загальний настрій у підрозділі перед виконанням завдань?' },
+      { category: 'Згуртованість та МПК', text: 'Як ви оцінюєте загальний рівень згуртованості та морально-психологічного клімату підрозділу?' }
+    ]);
+
+    // 4. ПРОФЕСІЙНІ ТА СПЕЦІАЛЬНІ ТЕМИ З МАТЕРІАЛІВ ВЧ А5313
+    const A5313_DUTIES = buildQuestions([
+      { category: 'Функціональні обов’язки (ВЧ А5313)', text: 'Наскільки чітко розмежовані завдання між відділеннями супроводження груп ПМП, моральної та оперативної психологічної підтримки?' },
+      { category: 'Функціональні обов’язки (ВЧ А5313)', text: 'Чи забезпечена належна взаємодія відділення психологічного супроводу з командуванням підрозділів під час виїзної роботи?' },
+      { category: 'Функціональні обов’язки (ВЧ А5313)', text: 'Наскільки своєчасно група транспортного забезпечення закриває потреби виїзних груп психологічної підтримки?' },
+      { category: 'Функціональні обов’язки (ВЧ А5313)', text: 'Чи достатньо методичних та діагностичних матеріалів для роботи груп ПМП на виїзді?' },
+      { category: 'Функціональні обов’язки (ВЧ А5313)', text: 'Як ви оцінюєте оперативність узагальнення результатів психологічної роботи та підготовки звітних матеріалів?' }
+    ]);
+
+    const MPS_ORDERS = buildQuestions([
+      { category: 'Оцінювання МПС та керівні накази', text: 'Наскільки системно під час оцінювання МПС враховуються всі чотири базові компоненти (моральний, емоційно-вольовий, функціональний, фаховий)?' },
+      { category: 'Оцінювання МПС та керівні накази', text: 'Чи ефективно організована робота пунктів психологічної допомоги та відновлення згідно з керівними наказами?' },
+      { category: 'Оцінювання МПС та керівні накази', text: 'Наскільки якісно проводиться первинний скринінг та виявлення військовослужбовців із ознаками гострої стресової реакції?' },
+      { category: 'Оцінювання МПС та керівні накази', text: 'Чи вчасно надаються рекомендації командирам підрозділів за результатами діагностики особового складу?' },
+      { category: 'Оцінювання МПС та керівні накази', text: 'Наскільки чітко дотримується конфіденційність персональних психодіагностичних даних військовослужбовців?' }
+    ]);
+
+    const SZCH_PREVENTION = buildQuestions([
+      { category: 'Профілактика СЗЧ та правопорушень', text: 'Наскільки своєчасно в підрозділі виявляються військовослужбовці з ознаками соціальної ізоляції або гострих сімейних проблем?' },
+      { category: 'Профілактика СЗЧ та правопорушень', text: 'Чи проводяться з особовим складом роз’яснення правових наслідків самовільного залишення частини та невиконання наказів?' },
+      { category: 'Профілактика СЗЧ та правопорушень', text: 'Наскільки ефективно командири нижчої ланки здійснюють індивідуальну роботу з підлеглими групи підвищеної уваги?' },
+      { category: 'Профілактика СЗЧ та правопорушень', text: 'Чи мають військовослужбовці реальну можливість законним шляхом вирішити нагальні побутові чи медичні питання без крайніх кроків?' },
+      { category: 'Профілактика СЗЧ та правопорушень', text: 'Як ви оцінюєте взаємодію командирів, медиків і психологів у запобіганні правопорушенням?' }
+    ]);
+
+    const STATUTES_DOCS = buildQuestions([
+      { category: 'Статути ЗСУ, рапорти та діловодство', text: 'Наскільки чітко в підрозділі дотримується порядок подання, реєстрації та розгляду рапортів військовослужбовців?' },
+      { category: 'Статути ЗСУ, рапорти та діловодство', text: 'Чи знають військовослужбовці порядок оформлення рапортів на лікування, ВЛК, відпустку та грошову допомогу?' },
+      { category: 'Статути ЗСУ, рапорти та діловодство', text: 'Наскільки об’єктивно та в установлені строки проводяться службові перевірки та розслідування?' },
+      { category: 'Статути ЗСУ, рапорти та діловодство', text: 'Чи дотримуються вимоги Інструкції з діловодства під час обліку та зберігання службових документів?' },
+      { category: 'Статути ЗСУ, рапорти та діловодство', text: 'Як ви оцінюєте правову обізнаність особового складу щодо своїх прав та обов’язків за статутами ЗСУ?' }
+    ]);
 
     const DEFAULT_TOPICS = {
+      'combined-40': {
+        id: 'combined-40',
+        title: 'Забезпечення, дисципліна, БЗВП та виконання бойових завдань (40 питань)',
+        questions: COMBINED_40_QUESTIONS
+      },
       'stan-pidrozdilu': {
         id: 'stan-pidrozdilu',
-        title: 'Стан підрозділу',
-        questions: UNIT_STATE_47_QUESTIONS.map((text, idx) => ({
-          id: `sp-${idx + 1}`,
-          category: 'Стан підрозділу',
-          text,
-          options: DEFAULT_SCALE_OPTIONS
-        }))
+        title: 'Стан підрозділу (розширений опитувальник — 47 питань)',
+        questions: UNIT_STATE_47
       },
-      'pidhotovka-ta-bezpeka': {
-        id: 'pidhotovka-ta-bezpeka',
-        title: 'Підготовка та заходи безпеки',
-        questions: [
-          {
-            id: 'pb-1',
-            category: 'Підготовка та безпека',
-            text: 'Наскільки чітко доведені правила безпеки перед початком занять або завдань?',
-            options: DEFAULT_SCALE_OPTIONS
-          },
-          {
-            id: 'pb-2',
-            category: 'Підготовка та безпека',
-            text: 'Чи достатньо практичних відпрацювань стандартних алгоритмів дій?',
-            options: DEFAULT_SCALE_OPTIONS
-          },
-          {
-            id: 'pb-3',
-            category: 'Підготовка та безпека',
-            text: 'Як ви оцінюєте готовність групи до дій у нестандартних умовах?',
-            options: DEFAULT_SCALE_OPTIONS
-          }
-        ]
+      'stress-sleep-20': {
+        id: 'stress-sleep-20',
+        title: 'Експрес-оцінка стресу, сну та відновлення (20 питань)',
+        questions: STRESS_SLEEP_20
+      },
+      'adaptation-20': {
+        id: 'adaptation-20',
+        title: 'Адаптація новоприбулих та поповнення (20 питань)',
+        questions: ADAPTATION_20
+      },
+      'cohesion-mpk-20': {
+        id: 'cohesion-mpk-20',
+        title: 'Згуртованість та морально-психологічний клімат (20 питань)',
+        questions: COHESION_MPK_20
+      },
+      'a5313-duties': {
+        id: 'a5313-duties',
+        title: 'Функціональні обов’язки та організація роботи (ВЧ А5313)',
+        questions: A5313_DUTIES
+      },
+      'mps-orders': {
+        id: 'mps-orders',
+        title: 'Оцінювання МПС, психологічна підготовка та керівні накази',
+        questions: MPS_ORDERS
+      },
+      'szch-prevention': {
+        id: 'szch-prevention',
+        title: 'Профілактика СЗЧ, дисципліни та правопорушень',
+        questions: SZCH_PREVENTION
+      },
+      'statutes-docs': {
+        id: 'statutes-docs',
+        title: 'Статути ЗСУ, рапорти та діловодство',
+        questions: STATUTES_DOCS
       }
     };
 
     function cloneDefaultState() {
       return {
-        unitName: '81-й підрозділ',
-        selectedTopicId: 'stan-pidrozdilu',
-        questionCount: 10,
+        milUnit: 'ВЧ А5313',
+        subunit: 'Відділення супроводження груп ПМП',
+        customSubunit: '',
+        selectedTopicId: 'combined-40',
+        questionCount: 40,
         anonymous: false,
         apiUrl: '',
         topics: JSON.parse(JSON.stringify(DEFAULT_TOPICS)),
@@ -402,9 +831,13 @@
         const parsed = JSON.parse(raw);
         const fallback = cloneDefaultState();
         const mergedTopics = { ...fallback.topics, ...(parsed.topics || {}) };
-        if (!mergedTopics['stan-pidrozdilu'] || !Array.isArray(mergedTopics['stan-pidrozdilu'].questions) || mergedTopics['stan-pidrozdilu'].questions.length !== 47) {
-          mergedTopics['stan-pidrozdilu'] = fallback.topics['stan-pidrozdilu'];
-        }
+        // Гарантуємо актуальність оновлених системних банків питань
+        Object.keys(fallback.topics).forEach(key => {
+          const existing = mergedTopics[key];
+          if (!existing || !Array.isArray(existing.questions) || existing.questions.length < fallback.topics[key].questions.length) {
+            mergedTopics[key] = fallback.topics[key];
+          }
+        });
         return {
           ...fallback,
           ...parsed,
@@ -424,6 +857,13 @@
       }
     }
 
+    function getResolvedSubunit() {
+      if (state.subunit === 'custom') {
+        return state.customSubunit.trim() || 'Інший підрозділ';
+      }
+      return state.subunit || 'Підрозділ';
+    }
+
     function getCurrentTopic() {
       return state.topics[state.selectedTopicId] || Object.values(state.topics)[0];
     }
@@ -433,7 +873,7 @@
       const modalSelectEl = document.getElementById('new-q-topic');
       const topicList = Object.values(state.topics);
 
-      selectEl.innerHTML = topicList.map(t => `<option value="${t.id}">${escapeHtml(t.title)} (${t.questions.length})</option>`).join('');
+      selectEl.innerHTML = topicList.map(t => `<option value="${t.id}">${escapeHtml(t.title)}</option>`).join('');
       modalSelectEl.innerHTML = topicList.map(t => `<option value="${t.id}">${escapeHtml(t.title)}</option>`).join('');
 
       if (!state.topics[state.selectedTopicId] && topicList.length > 0) {
@@ -453,7 +893,8 @@
       document.getElementById('label-qcount').textContent = `${state.questionCount} питань`;
       document.getElementById('label-topic-max').textContent = `Макс: ${maxQ}`;
 
-      const presets = [5, 10, 20, 30, 47].filter(n => n <= maxQ);
+      const candidates = [5, 10, 20, 30, 40, 47, maxQ];
+      const presets = [...new Set(candidates.filter(n => n >= 1 && n <= maxQ))].sort((a, b) => a - b);
       const presetsContainer = document.getElementById('qcount-presets');
       presetsContainer.innerHTML = presets.map(n => {
         const active = state.questionCount === n;
@@ -473,12 +914,13 @@
     function refreshRunnerIntro() {
       const session = state.isRespondentLink && state.activeSession ? state.activeSession : null;
       const topic = session ? (state.topics[session.topicId] || getCurrentTopic()) : getCurrentTopic();
-      const unit = session ? session.unitName : state.unitName;
+      const milUnit = session ? session.milUnit : state.milUnit;
+      const subunit = session ? session.subunit : getResolvedSubunit();
       const qCount = session ? session.questionCount : state.questionCount;
       const anon = session ? session.anonymous : state.anonymous;
 
       document.getElementById('runner-title').textContent = topic.title;
-      document.getElementById('runner-meta').textContent = `Підрозділ: ${unit} • Питань: ${qCount}${anon ? ' • Анонімно' : ''}`;
+      document.getElementById('runner-meta').textContent = `${milUnit} • ${subunit} • Питань: ${qCount}${anon ? ' • Анонімно' : ''}`;
       document.getElementById('runner-respondent-fields').classList.toggle('hidden', Boolean(anon));
     }
 
@@ -510,12 +952,13 @@
       const code = generateShortSessionCode();
       const sessionObj = {
         code,
-        unitName: document.getElementById('input-unit').value.trim() || 'Підрозділ',
+        milUnit: document.getElementById('input-mil-unit').value.trim() || 'ВЧ А5313',
+        subunit: getResolvedSubunit(),
         topicId: topic.id,
         questionCount: Math.min(state.questionCount, topic.questions.length),
         anonymous: document.getElementById('checkbox-anon').checked
       };
-      state.unitName = sessionObj.unitName;
+      state.milUnit = sessionObj.milUnit;
       state.anonymous = sessionObj.anonymous;
       state.activeSession = sessionObj;
       saveState();
@@ -548,7 +991,7 @@
 
       const nameVal = document.getElementById('resp-name').value.trim();
       if (!anon && !nameVal) {
-        alert("Вкажіть ПІБ або позивний перед початком тестування.");
+        alert('Вкажіть ПІБ або позивний перед початком тестування.');
         return;
       }
 
@@ -606,8 +1049,10 @@
 
       const session = state.isRespondentLink && state.activeSession ? state.activeSession : null;
       const topic = session ? (state.topics[session.topicId] || getCurrentTopic()) : getCurrentTopic();
-      const unit = session ? session.unitName : state.unitName;
+      const milUnit = session ? session.milUnit : state.milUnit;
+      const subunit = session ? session.subunit : getResolvedSubunit();
       const anon = session ? session.anonymous : state.anonymous;
+
       const respondent = anon
         ? 'Анонімно'
         : `${document.getElementById('resp-name').value.trim() || 'Учасник'}${document.getElementById('resp-rank').value.trim() ? ' (' + document.getElementById('resp-rank').value.trim() + ')' : ''}`;
@@ -616,15 +1061,30 @@
         ? Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2))
         : 0;
 
+      const lowItems = runnerQuestions
+        .filter(q => runnerAnswers[q.id] !== undefined && runnerAnswers[q.id] <= 2)
+        .map(q => ({
+          category: q.category || topic.title,
+          text: q.text,
+          score: runnerAnswers[q.id],
+          responsibility: q.responsibility === 'soldier'
+            ? 'Недолік з боку військовослужбовця'
+            : 'Недолік з боку командування / організації',
+          solution: q.solution || 'Провести розбір та вжити заходів щодо усунення недоліку.'
+        }));
+
       const record = {
         id: `sub-${Date.now()}`,
         date: new Date().toLocaleString('uk-UA'),
-        unit,
+        milUnit,
+        subunit,
+        unit: `${milUnit} / ${subunit}`,
         respondent,
         topicTitle: topic.title,
         answeredCount: scores.length,
         totalQuestions: runnerQuestions.length,
         avgScore,
+        deficiencies: lowItems,
         sessionCode: session ? session.code : (state.activeSession ? state.activeSession.code : '')
       };
 
@@ -655,7 +1115,28 @@
         ? (list.reduce((acc, item) => acc + (Number(item.avgScore) || 0), 0) / list.length).toFixed(2)
         : '0.00';
       document.getElementById('stat-avg').textContent = avg;
+      const riskCount = list.filter(item => Number(item.avgScore) < 3.0).length;
+      document.getElementById('stat-risk').textContent = String(riskCount);
       document.getElementById('stat-last-unit').textContent = list.length ? list[0].unit : '—';
+
+      const defContainer = document.getElementById('deficiencies-list');
+      const allDefs = list.flatMap(item =>
+        (item.deficiencies || []).map(d => ({ ...d, unit: item.unit, respondent: item.respondent }))
+      );
+      if (!allDefs.length) {
+        defContainer.innerHTML = `<p class="text-slate-400">Критичних недоліків (оцінки 1–2 бали) поки не зафіксовано.</p>`;
+      } else {
+        defContainer.innerHTML = allDefs.slice(0, 25).map(d => `
+          <div class="p-3 rounded-xl border border-amber-200 bg-amber-50/70 space-y-1">
+            <div class="flex flex-wrap items-center justify-between gap-1">
+              <span class="font-bold text-amber-900">${escapeHtml(d.responsibility)}</span>
+              <span class="text-[11px] text-slate-500">${escapeHtml(d.unit)} • Оцінка: ${d.score}/5</span>
+            </div>
+            <p class="text-slate-800 font-medium">${escapeHtml(d.text)}</p>
+            <p class="text-emerald-900"><span class="font-semibold">Запропоноване вирішення:</span> ${escapeHtml(d.solution)}</p>
+          </div>
+        `).join('');
+      }
 
       const tbody = document.getElementById('submissions-tbody');
       if (!list.length) {
@@ -663,11 +1144,11 @@
       } else {
         tbody.innerHTML = list.map(item => `
           <tr>
-            <td class="py-2.5 pr-4 text-slate-500">${escapeHtml(item.date)}</td>
+            <td class="py-2.5 pr-4 text-slate-500 whitespace-nowrap">${escapeHtml(item.date)}</td>
             <td class="py-2.5 pr-4 font-medium text-slate-800">${escapeHtml(item.unit)}</td>
             <td class="py-2.5 pr-4 text-slate-700">${escapeHtml(item.respondent)}</td>
             <td class="py-2.5 pr-4 text-slate-700">${escapeHtml(item.topicTitle)}</td>
-            <td class="py-2.5 font-semibold text-emerald-800">${item.avgScore} / 5 (${item.answeredCount}/${item.totalQuestions})</td>
+            <td class="py-2.5 font-semibold text-emerald-800 whitespace-nowrap">${item.avgScore} / 5 (${item.answeredCount}/${item.totalQuestions})</td>
           </tr>
         `).join('');
       }
@@ -696,6 +1177,28 @@
       });
     }
 
+    function exportCsv() {
+      if (!state.submissions.length) {
+        alert('Немає даних для експорту.');
+        return;
+      }
+      const headers = ['Дата', 'Підрозділ', 'Учасник', 'Тема', 'Середній бал', 'Відповідей', 'Всього питань', 'Виявлені недоліки'];
+      const rows = state.submissions.map(s => {
+        const defs = (s.deficiencies || []).map(d => `[${d.responsibility}] ${d.text} -> ${d.solution}`).join(' | ');
+        return [s.date, s.unit, s.respondent, s.topicTitle, s.avgScore, s.answeredCount, s.totalQuestions, defs]
+          .map(val => `"${String(val || '').replace(/"/g, '""')}"`)
+          .join(';');
+      });
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `zvit_pidrozdilu_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
     function escapeHtml(str) {
       return String(str || '')
         .replace(/&/g, '&amp;')
@@ -708,15 +1211,36 @@
       btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
     });
 
-    document.getElementById('input-unit').value = state.unitName;
-    document.getElementById('input-unit').addEventListener('input', e => {
-      state.unitName = e.target.value;
+    document.getElementById('input-mil-unit').value = state.milUnit;
+    document.getElementById('input-mil-unit').addEventListener('input', e => {
+      state.milUnit = e.target.value;
+      saveState();
+      refreshRunnerIntro();
+    });
+
+    const subunitSelect = document.getElementById('select-subunit');
+    const customSubunitInput = document.getElementById('input-custom-subunit');
+    subunitSelect.value = state.subunit;
+    customSubunitInput.value = state.customSubunit || '';
+    customSubunitInput.classList.toggle('hidden', state.subunit !== 'custom');
+
+    subunitSelect.addEventListener('change', e => {
+      state.subunit = e.target.value;
+      customSubunitInput.classList.toggle('hidden', state.subunit !== 'custom');
+      saveState();
+      refreshRunnerIntro();
+    });
+
+    customSubunitInput.addEventListener('input', e => {
+      state.customSubunit = e.target.value;
       saveState();
       refreshRunnerIntro();
     });
 
     document.getElementById('select-topic').addEventListener('change', e => {
       state.selectedTopicId = e.target.value;
+      const t = getCurrentTopic();
+      state.questionCount = t.questions.length;
       saveState();
       syncTopicUI();
       refreshRunnerIntro();
@@ -759,6 +1283,8 @@
       document.getElementById('sync-status').textContent = `Оновлено о ${new Date().toLocaleTimeString('uk-UA')}.`;
     });
 
+    document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
+
     document.getElementById('btn-open-add-q').addEventListener('click', () => {
       document.getElementById('modal-add-q').classList.remove('hidden');
     });
@@ -774,6 +1300,8 @@
         id: `custom-${Date.now()}`,
         category: target.title,
         text,
+        responsibility: 'command',
+        solution: 'Провести розбір та вжити заходів щодо усунення недоліку.',
         options: DEFAULT_SCALE_OPTIONS
       });
       saveState();
