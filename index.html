@@ -101,6 +101,14 @@
               Тема тестування / опитування
             </label>
             <select id="select-topic" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+
+            <div id="topic-questions-preview" class="mt-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Питання обраної теми</span>
+                <span id="topic-questions-count-badge" class="text-xs font-semibold text-emerald-800"></span>
+              </div>
+              <ol id="topic-questions-list" class="list-decimal list-inside text-xs text-slate-700 space-y-1 max-h-44 overflow-y-auto pr-1"></ol>
+            </div>
           </div>
 
           <div>
@@ -163,13 +171,8 @@
             </button>
           </div>
           <p id="sync-status" class="text-xs text-slate-500">Локальне сховище активне.</p>
-          <div class="pt-3 border-t border-slate-100 text-xs text-slate-500 space-y-1">
-            <p class="font-semibold text-slate-700">Структура нового блока (40 питань):</p>
-            <p>1. Забезпечення (вкл. фінансове) — 10 питань</p>
-            <p>2. Дисципліна та порядок — 10 питань</p>
-            <p>3. Базова військова підготовка (БЗВП) — 10 питань</p>
-            <p>4. Виконання бойових завдань — 10 питань</p>
-          </div>
+
+          <div id="topic-blocks-preview" class="pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-1.5"></div>
         </div>
       </div>
     </section>
@@ -345,11 +348,6 @@
       }));
     }
 
-    // 1. НОВИЙ ОБ'ЄДНАНИЙ БЛОК НА 40 ПИТАНЬ:
-    // 1) Забезпечення (вкл. фінансове) — 10
-    // 2) Дисципліна та порядок — 10
-    // 3) Базова військова підготовка (БЗВП) — 10
-    // 4) Виконання бойових завдань — 10
     const COMBINED_40_QUESTIONS = buildQuestions([
       // РОЗДІЛ 1: ЗАБЕЗПЕЧЕННЯ (10)
       {
@@ -600,7 +598,6 @@
       }
     ]);
 
-    // 2. СТАН ПІДРОЗДІЛУ — 47 ПИТАНЬ (БЕЗ ЗМІН)
     const UNIT_STATE_47 = buildQuestions([
       { category: 'Призов та оформлення', text: 'Наскільки чітко та зрозуміло пройшов ваш етап призову й первинного оформлення документів?' },
       { category: 'Призов та оформлення', text: 'Чи достатньо повно вас поінформували про права, обов’язки та соціальні гарантії під час зарахування?' },
@@ -651,7 +648,6 @@
       { category: 'Загальна оцінка', text: 'Якою є ваша загальна оцінка поточного стану підрозділу за всіма ключовими напрямами?' }
     ]);
 
-    // 3. ТРИ КОРОТКІ ТЕМИ ПО 20 ПИТАНЬ
     const STRESS_SLEEP_20 = buildQuestions([
       { category: 'Стрес, сон та відновлення', text: 'Наскільки якісним і глибоким є ваш сон протягом останнього тижня?' },
       { category: 'Стрес, сон та відновлення', text: 'Чи вдається вам швидко заснути після завершення чергування або завдання?' },
@@ -721,7 +717,6 @@
       { category: 'Згуртованість та МПК', text: 'Як ви оцінюєте загальний рівень згуртованості та морально-психологічного клімату підрозділу?' }
     ]);
 
-    // 4. ПРОФЕСІЙНІ ТА СПЕЦІАЛЬНІ ТЕМИ З МАТЕРІАЛІВ ВЧ А5313
     const A5313_DUTIES = buildQuestions([
       { category: 'Функціональні обов’язки (ВЧ А5313)', text: 'Наскільки чітко розмежовані завдання між відділеннями супроводження груп ПМП, моральної та оперативної психологічної підтримки?' },
       { category: 'Функціональні обов’язки (ВЧ А5313)', text: 'Чи забезпечена належна взаємодія відділення психологічного супроводу з командуванням підрозділів під час виїзної роботи?' },
@@ -831,7 +826,6 @@
         const parsed = JSON.parse(raw);
         const fallback = cloneDefaultState();
         const mergedTopics = { ...fallback.topics, ...(parsed.topics || {}) };
-        // Гарантуємо актуальність оновлених системних банків питань
         Object.keys(fallback.topics).forEach(key => {
           const existing = mergedTopics[key];
           if (!existing || !Array.isArray(existing.questions) || existing.questions.length < fallback.topics[key].questions.length) {
@@ -866,6 +860,33 @@
 
     function getCurrentTopic() {
       return state.topics[state.selectedTopicId] || Object.values(state.topics)[0];
+    }
+
+    function renderTopicBlocksAndQuestions(topic) {
+      const blocksEl = document.getElementById('topic-blocks-preview');
+      const qListEl = document.getElementById('topic-questions-list');
+      const qBadgeEl = document.getElementById('topic-questions-count-badge');
+
+      const grouped = new Map();
+      (topic.questions || []).forEach(q => {
+        const cat = q.category || topic.title;
+        grouped.set(cat, (grouped.get(cat) || 0) + 1);
+      });
+
+      const blockRows = Array.from(grouped.entries()).map(([cat, count], index) =>
+        `<p><span class="font-semibold text-slate-800">${index + 1}. ${escapeHtml(cat)}</span> — ${count} ${count === 1 ? 'питання' : (count >= 2 && count <= 4 ? 'питання' : 'питань')}</p>`
+      ).join('');
+
+      blocksEl.innerHTML = `
+        <p class="font-bold text-slate-800">Блоки теми «${escapeHtml(topic.title)}»:</p>
+        ${blockRows || '<p class="text-slate-400">Немає блоків.</p>'}
+      `;
+
+      const activeSlice = (topic.questions || []).slice(0, Math.min(state.questionCount, topic.questions.length));
+      qBadgeEl.textContent = `У сесії: ${activeSlice.length} з ${topic.questions.length}`;
+      qListEl.innerHTML = activeSlice.map(q =>
+        `<li>${escapeHtml(q.text)}</li>`
+      ).join('');
     }
 
     function syncTopicUI() {
@@ -909,6 +930,8 @@
           refreshRunnerIntro();
         });
       });
+
+      renderTopicBlocksAndQuestions(topic);
     }
 
     function refreshRunnerIntro() {
